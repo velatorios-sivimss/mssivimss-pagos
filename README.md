@@ -1,2 +1,2 @@
-# mssivimss-pagos
-CU036_RealizarPago_SIVIMSS
+# mssivimss-arquetipo
+Arquetipo_SIVIMSS
