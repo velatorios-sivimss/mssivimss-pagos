@@ -1,12 +1,5 @@
 package com.imss.sivimss.arquetipo.util;
-
-/**
- * Clase para la paginacion
- *
- * @author Pablo Nolasco   
- * @puesto dev
- * @date  abril. 2023
- */
+ 
 public class AppConstantes {
 	
 	public static final String NUMERO_DE_PAGINA = "0";
@@ -31,7 +24,8 @@ public class AppConstantes {
 	public static final String ILLEGALARGUMENTEXCEPTION_MENSAJE  = "Token vacío.";
 	public static final String SIGNATUREEXCEPTION_MENSAJE  = "Fallo la firma.";
 	public static final String FORBIDDENEXCEPTION_MENSAJE  = "No tiene autorización para realizar la solicitud.";
-	public static final String CIRCUITBREAKER = "El servicio no responde, no permite más llamadas.";
+	public static final String CIRCUITBREAKER = "186"; //El servicio no responde, no permite más llamadas.
+	public static final String OCURRIO_ERROR_GENERICO="187";// Ocurrio un error al procesar tu solicitud.
 	
 	private AppConstantes() {
 	    throw new IllegalStateException("AppConstantes class");

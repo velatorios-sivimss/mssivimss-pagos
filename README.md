@@ -1,2 +1,2 @@
 # mssivimss-arquetipo
-Arquetipo_SIVIMSS
+Arquetipo

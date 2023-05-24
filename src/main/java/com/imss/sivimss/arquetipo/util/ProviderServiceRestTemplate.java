@@ -41,11 +41,11 @@ public class ProviderServiceRestTemplate {
 		}
 	}
 
-	public Response<?> consumirServicioReportes(Map<String, Object> dato, String nombreReporte, String tipoReporte,
+	public Response<?> consumirServicioReportes(Map<String, Object> dato,
 			String url, Authentication authentication) throws IOException {
 		try {
 			Response<?> respuestaGenerado = restTemplateUtil.sendPostRequestByteArrayReportesToken(url,
-					new DatosReporteDTO(dato, nombreReporte, tipoReporte),
+					new DatosReporteDTO(dato),
 					jwtTokenProvider.createToken((String) authentication.getPrincipal()), Response.class);
 			return validarResponse(respuestaGenerado);
 		} catch (IOException exception) {
@@ -112,7 +112,9 @@ public class ProviderServiceRestTemplate {
 		try {
 			response = isExceptionResponseMs == 1 ? gson.fromJson(error.substring(2, error.length() - 1), Response.class)
 				: new Response<>(true, codigoError, error.toString().trim(), Collections.emptyList());
+			log.info("respuestaProvider error: {}",e);
 		} catch (Exception e2) {
+			log.info("respuestaProvider error: {}",e);
 			return new Response<>(true, HttpStatus.REQUEST_TIMEOUT.value(), AppConstantes.CIRCUITBREAKER, Collections.emptyList());
 		}
 		 return MensajeResponseUtil.mensajeResponse(response, "");
