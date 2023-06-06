@@ -22,11 +22,12 @@ public class LogUtil {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LogUtil.class);
 
+    private static final String NOMBRE = "mssivimss-pagos";
 
     public void crearArchivoLog(String tipoLog, String origen, String clasePath, String mensaje, String tiempoEjecucion, Authentication authentication) throws IOException {
         Gson json = new Gson();
         UsuarioDto usuarioDto = json.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
-        File archivo = new File(rutaLog + new SimpleDateFormat("ddMMyyyy").format(new Date()) + ".log");
+        File archivo = new File(rutaLog + NOMBRE + new SimpleDateFormat("ddMMyyyy").format(new Date()) + ".log");
         FileWriter escribirArchivo = new FileWriter(archivo, true);
         try {
             escribirArchivo.write("" + formatoFechaLog + " --- [" + tipoLog + "] " + origen + " " + clasePath + " : " + mensaje + " , Usuario: " + usuarioDto.getCveUsuario() + " - " + tiempoEjecucion);
@@ -43,7 +44,7 @@ public class LogUtil {
     }
 
     public void crearArchivoLogDTO(String tipoLog, String origen, String clasePath, String mensaje, String tiempoEjecucion, UsuarioDto usuarioDto) throws IOException {
-        File archivo = new File(rutaLog + new SimpleDateFormat("ddMMyyyy").format(new Date()) + ".log");
+        File archivo = new File(rutaLog + NOMBRE + new SimpleDateFormat("ddMMyyyy").format(new Date()) + ".log");
         FileWriter escribirArchivo = new FileWriter(archivo, true);
         try {
             escribirArchivo.write("" + formatoFechaLog + " --- [" + tipoLog + "] " + origen + " " + clasePath + " : " + mensaje + " , Usuario: " + usuarioDto.getCveUsuario() + " - " + tiempoEjecucion);
