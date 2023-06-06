@@ -16,16 +16,10 @@ import lombok.Setter;
 @JsonIgnoreType(value = true)
 public class FiltroRequest {
 
-	private Integer idPagoBitacora;
-	private Integer idRegistro;
-	private Integer idFlujoPagos;
-	private Integer idVelatorio;
-	private String fOds;
+	private String idVelatorio;
+	private String idFlujoPagos;
+	private String folio;
 	private String nomContratante;
-	private String claveFolio;
-	private String descValor;
-	private String clavePago;
-	private Integer nivel;
 	private String fechaInicio;
 	private String fechaFin;
 	

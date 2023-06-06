@@ -28,10 +28,10 @@ public class ProviderServiceRestTemplate {
 
 	private static final Logger log = LoggerFactory.getLogger(ProviderServiceRestTemplate.class);
 
-	public Response<?> consumirServicio(Map<String, Object> dato, String url, Authentication authentication)
+	public Response<Object> consumirServicio(Map<String, Object> dato, String url, Authentication authentication)
 			throws IOException {
 		try {
-			Response<?> respuestaGenerado = restTemplateUtil.sendPostRequestByteArrayToken(url,
+			Response<Object> respuestaGenerado = restTemplateUtil.sendPostRequestByteArrayToken(url,
 					new EnviarDatosRequest(dato), jwtTokenProvider.createToken((String) authentication.getPrincipal()),
 					Response.class);
 			return validarResponse(respuestaGenerado);
@@ -41,10 +41,10 @@ public class ProviderServiceRestTemplate {
 		}
 	}
 
-	public Response<?> consumirServicioReportes(Map<String, Object> dato,
+	public Response<Object> consumirServicioReportes(Map<String, Object> dato,
 			String url, Authentication authentication) throws IOException {
 		try {
-			Response<?> respuestaGenerado = restTemplateUtil.sendPostRequestByteArrayReportesToken(url,
+			Response<Object> respuestaGenerado = restTemplateUtil.sendPostRequestByteArrayReportesToken(url,
 					new DatosReporteDTO(dato),
 					jwtTokenProvider.createToken((String) authentication.getPrincipal()), Response.class);
 			return validarResponse(respuestaGenerado);
@@ -54,7 +54,7 @@ public class ProviderServiceRestTemplate {
 		}
 	}
 
-	public Response<?> validarResponse(Response<?> respuestaGenerado) {
+	public Response<Object> validarResponse(Response<Object> respuestaGenerado) {
 		String codigo = respuestaGenerado.getMensaje().substring(0, 3);
 		if (codigo.equals("500") || codigo.equals("404") || codigo.equals("400") || codigo.equals("403")) {
 			Gson gson = new Gson();

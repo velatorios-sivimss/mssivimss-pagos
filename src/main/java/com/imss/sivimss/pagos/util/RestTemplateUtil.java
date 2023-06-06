@@ -70,9 +70,10 @@ public class RestTemplateUtil {
 	 * @param clazz
 	 * @return
 	 */
-	public Response<?> sendPostRequestByteArrayToken(String url, EnviarDatosRequest body, String subject,
+	@SuppressWarnings("unchecked")
+	public Response<Object> sendPostRequestByteArrayToken(String url, EnviarDatosRequest body, String subject,
 			Class<?> clazz) throws IOException {
-		Response<?> responseBody = new Response<>();
+		Response<Object> responseBody = new Response<>();
 		HttpHeaders headers = RestTemplateUtil.createHttpHeadersToken(subject);
 
 		HttpEntity<Object> request = new HttpEntity<>(body, headers);
@@ -80,7 +81,7 @@ public class RestTemplateUtil {
 
 		responseEntity = restTemplate.postForEntity(url, request, clazz);
 
-		responseBody = (Response<List<String>>) responseEntity.getBody();
+		responseBody = (Response<Object>) responseEntity.getBody();
 
 		return responseBody;
 	}
@@ -183,15 +184,16 @@ public class RestTemplateUtil {
 	 * @param clazz
 	 * @return
 	 */
-	public Response<?> sendPostRequestByteArrayReportesToken(String url, DatosReporteDTO body, String subject,
+	@SuppressWarnings("unchecked")
+	public Response<Object> sendPostRequestByteArrayReportesToken(String url, DatosReporteDTO body, String subject,
 			Class<?> clazz) throws IOException {
-		Response<?> responseBody = new Response<>();
+		Response<Object> responseBody = new Response<>();
 		HttpHeaders headers = RestTemplateUtil.createHttpHeadersToken(subject);
 
 		HttpEntity<Object> request = new HttpEntity<>(body, headers);
 		ResponseEntity<?> responseEntity = null;
 		responseEntity = restTemplate.postForEntity(url, request, clazz);
-		responseBody = (Response<List<String>>) responseEntity.getBody();
+		responseBody = (Response<Object>) responseEntity.getBody();
 
 		return responseBody;
 	}
