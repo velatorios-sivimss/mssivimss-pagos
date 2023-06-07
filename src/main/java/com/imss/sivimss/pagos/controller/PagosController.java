@@ -62,6 +62,56 @@ public class PagosController {
 		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
 	}
 	
+	@PostMapping("/consulta/prevFun")
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	public CompletableFuture<Object> consultaPf(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		Response<?> response =   pagosService.consultaPf(request,authentication);
+		
+		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
+	@PostMapping("/consulta/renPrevFun")
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	public CompletableFuture<Object> consultaRpf(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		Response<?> response =   pagosService.consultaRpf(request,authentication);
+		
+		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
+	
+	@PostMapping("/consulta/folios/ordenServicio")
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	public CompletableFuture<Object> consultaFolOds(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		Response<?> response =   pagosService.consultaFolOds(request,authentication);
+		
+		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
+	@PostMapping("/consulta/folios/prevFun")
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	public CompletableFuture<Object> consultaFolPf(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		Response<?> response =   pagosService.consultaFolPf(request,authentication);
+		
+		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
+	@PostMapping("/consulta/folios/renPrevFun")
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	public CompletableFuture<Object> consultaFolRpf(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		Response<?> response =   pagosService.consultaFolRpf(request,authentication);
+		
+		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
 	
 	/**
 	 * fallbacks generico
