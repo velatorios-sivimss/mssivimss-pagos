@@ -15,4 +15,7 @@ public interface PagosService {
 	Response<Object> consultaRpf(DatosRequest request, Authentication authentication) throws IOException;
 	Response<Object> crear(DatosRequest request, Authentication authentication) throws IOException;
 	Response<Object> obtenerPorId(DatosRequest request, Authentication authentication) throws IOException;
+	Response<Object> consultaFolOds(DatosRequest request, Authentication authentication) throws IOException;
+	Response<Object> consultaFolPf(DatosRequest request, Authentication authentication) throws IOException;
+	Response<Object> consultaFolRpf(DatosRequest request, Authentication authentication) throws IOException;
 }
