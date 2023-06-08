@@ -34,8 +34,8 @@ public class PagosServiceImpl implements PagosService {
 	private ProviderServiceRestTemplate providerRestTemplate;
 	
 	private static final String CONSULTA = "consulta";
-	private static final String CONSULTA_PAGINADA = "/generico/paginado";
-	private static final String CONSULTA_GENERICA = "/generico/consulta";
+	private static final String CONSULTA_PAGINADA = "/paginado";
+	private static final String CONSULTA_GENERICA = "/consulta";
 	private static final String SIN_INFORMACION = "45";
 	
 	@Override
