@@ -25,16 +25,21 @@ public class LogUtil {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LogUtil.class);
 
+    private static String RETORNO = "\r\n";
+    
     public void crearArchivoLog(String tipoLog, String origen, String clasePath, String mensaje, String tiempoEjecucion, Authentication authentication) throws IOException {
         Gson json = new Gson();
         UsuarioDto usuarioDto = json.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
         File archivo = new File(rutaLog + nombre + new SimpleDateFormat("ddMMyyyy").format(new Date()) + ".log");
         FileWriter escribirArchivo = new FileWriter(archivo, true);
         try {
-            escribirArchivo.write("" + formatoFechaLog + " --- [" + tipoLog + "] " + origen + " " + clasePath + " : " + mensaje + " , Usuario: " + usuarioDto.getCveUsuario() + " - " + tiempoEjecucion);
-            escribirArchivo.write("\r\n");
+        	
+        	String peticion = "" + formatoFechaLog + " --- [" + tipoLog + "] " + origen + " " + clasePath + " : " + mensaje + " , Usuario: " + usuarioDto.getCveUsuario() + " - " + tiempoEjecucion;
+        	log.info(peticion);
+            escribirArchivo.write(peticion);
+            escribirArchivo.write(RETORNO);
             escribirArchivo.close();
-            escribirArchivo.close();
+            
         } catch (Exception e) {
             log.error("No se puede escribir el log.");
             log.error(e.getMessage());
@@ -48,10 +53,13 @@ public class LogUtil {
         File archivo = new File(rutaLog + nombre + new SimpleDateFormat("ddMMyyyy").format(new Date()) + ".log");
         FileWriter escribirArchivo = new FileWriter(archivo, true);
         try {
-            escribirArchivo.write("" + formatoFechaLog + " --- [" + tipoLog + "] " + origen + " " + clasePath + " : " + mensaje + " , Usuario: " + usuarioDto.getCveUsuario() + " - " + tiempoEjecucion);
-            escribirArchivo.write("\r\n");
+        	
+        	String peticion = "" + formatoFechaLog + " --- [" + tipoLog + "] " + origen + " " + clasePath + " : " + mensaje + " , Usuario: " + usuarioDto.getCveUsuario() + " - " + tiempoEjecucion;
+        	log.info(peticion);
+            escribirArchivo.write(peticion);
+            escribirArchivo.write(RETORNO);
             escribirArchivo.close();
-            escribirArchivo.close();
+            
         } catch (Exception e) {
             log.error("No se puede escribir el log.");
             log.error(e.getMessage());
