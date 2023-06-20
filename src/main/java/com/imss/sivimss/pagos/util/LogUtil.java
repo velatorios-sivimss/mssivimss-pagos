@@ -28,7 +28,8 @@ public class LogUtil {
     private static String RETORNO = "\r\n";
     
     public void crearArchivoLog(String tipoLog, String origen, String clasePath, String mensaje, String tiempoEjecucion, Authentication authentication) throws IOException {
-        Gson json = new Gson();
+        
+    	Gson json = new Gson();
         UsuarioDto usuarioDto = json.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
         File archivo = new File(rutaLog + nombre + new SimpleDateFormat("ddMMyyyy").format(new Date()) + ".log");
         FileWriter escribirArchivo = new FileWriter(archivo, true);

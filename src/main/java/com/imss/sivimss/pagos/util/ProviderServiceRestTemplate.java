@@ -40,6 +40,20 @@ public class ProviderServiceRestTemplate {
 			throw exception;
 		}
 	}
+	
+	public Response<Object> consumirServicioActMult( Object dato, String url, Authentication authentication)
+			throws IOException {
+		try {
+			Response<Object> respuestaGenerado = restTemplateUtil.sendPostRequestByteArrayToken(url,
+					dato, jwtTokenProvider.createToken((String) authentication.getPrincipal()),
+					Response.class);
+			return validarResponse(respuestaGenerado);
+		} catch (IOException exception) {
+			log.error("Ha ocurrido un error al recuperar la informacion");
+			throw exception;
+		}
+	}
+	
 
 	public Response<Object> consumirServicioReportes(Map<String, Object> dato,
 			String url, Authentication authentication) throws IOException {

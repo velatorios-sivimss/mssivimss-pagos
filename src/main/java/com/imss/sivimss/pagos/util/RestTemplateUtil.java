@@ -71,7 +71,7 @@ public class RestTemplateUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public Response<Object> sendPostRequestByteArrayToken(String url, EnviarDatosRequest body, String subject,
+	public Response<Object> sendPostRequestByteArrayToken(String url, Object body, String subject,
 			Class<?> clazz) throws IOException {
 		Response<Object> responseBody = new Response<>();
 		HttpHeaders headers = RestTemplateUtil.createHttpHeadersToken(subject);

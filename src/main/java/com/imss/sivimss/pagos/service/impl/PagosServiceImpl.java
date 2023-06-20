@@ -1,10 +1,15 @@
 package com.imss.sivimss.pagos.service.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -14,10 +19,13 @@ import com.google.gson.Gson;
 import com.imss.sivimss.pagos.service.PagosService;
 import com.imss.sivimss.pagos.util.DatosRequest;
 import com.imss.sivimss.pagos.util.Response;
+import com.imss.sivimss.pagos.model.request.UsuarioDto;
 import com.imss.sivimss.pagos.util.MensajeResponseUtil;
 import com.imss.sivimss.pagos.util.ProviderServiceRestTemplate;
 import com.imss.sivimss.pagos.util.LogUtil;
 import com.imss.sivimss.pagos.util.PagosUtil;
+import com.imss.sivimss.pagos.model.request.ActualizarMultiRequest;
+import com.imss.sivimss.pagos.model.request.CrearRequest;
 import com.imss.sivimss.pagos.model.request.FiltroRequest;
 import com.imss.sivimss.pagos.util.AppConstantes;
 
@@ -33,9 +41,13 @@ public class PagosServiceImpl implements PagosService {
 	@Autowired
 	private ProviderServiceRestTemplate providerRestTemplate;
 	
+	@Autowired
+	private ModelMapper modelMapper;
+	
 	private static final String CONSULTA = "consulta";
 	private static final String CONSULTA_PAGINADA = "/paginado";
 	private static final String CONSULTA_GENERICA = "/consulta";
+	private static final String ACTUALIZAR_MULTIPLES = "/actualizar/multiples";
 	private static final String SIN_INFORMACION = "45";
 	
 	@Override
@@ -111,10 +123,80 @@ public class PagosServiceImpl implements PagosService {
 		
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Response<Object> crear(DatosRequest request, Authentication authentication) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Gson gson = new Gson();
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
+		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
+		ArrayList<String> querys = new ArrayList<>();
+		PagosUtil pagosUtil = new PagosUtil();
+		List<Map<String, Object>> listadatos;
+		Double totalPagado;
+		String encoded;
+		Response<Object> response;
+		ActualizarMultiRequest actualizarMultiRequest = new ActualizarMultiRequest();
+		String query = pagosUtil.totalPagado(crearRequest.getIdPagoBitacora() );
+		
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+		
+		request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
+		
+		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+				authentication);
+		
+		listadatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
+		totalPagado = (Double) listadatos.get(0).get("totalPagado");
+		
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "","Total Pago BD " + totalPagado, authentication);
+	
+		totalPagado += crearRequest.getImportePago();
+		
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "","Total Pago Actualizado " + totalPagado, authentication);
+		
+		if( totalPagado >= crearRequest.getImporteRegistro() ) {
+			
+			//Actualizamos la OS y el Pago de la Bitacora a Pagado
+			if( crearRequest.getIdFlujoPago().equals(1) ) {
+				
+				query = pagosUtil.actODs( crearRequest.getIdRegistro(), usuarioDto.getIdUsuario() );
+				logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+						this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+				encoded = DatatypeConverter.printBase64Binary(query.getBytes());
+				querys.add( encoded );
+				
+			}
+			
+			query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario() );
+			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+					this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+			encoded = DatatypeConverter.printBase64Binary(query.getBytes());
+			querys.add( encoded );
+			
+		}
+		
+		query = pagosUtil.crearDetalle(crearRequest, usuarioDto.getIdUsuario());
+		
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+		
+		encoded = DatatypeConverter.printBase64Binary(query.getBytes());
+		querys.add( encoded );
+		
+		actualizarMultiRequest.setUpdates(querys);
+		
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "",CONSULTA +" " + actualizarMultiRequest, authentication);
+		
+		response = providerRestTemplate.consumirServicioActMult(actualizarMultiRequest, urlDomino + ACTUALIZAR_MULTIPLES, 
+				authentication);
+		
+		return response;
+	
 	}
 
 	@Override

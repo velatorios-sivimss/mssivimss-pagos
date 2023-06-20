@@ -1,5 +1,6 @@
 package com.imss.sivimss.pagos.util;
 
+import com.imss.sivimss.pagos.model.request.CrearRequest;
 import com.imss.sivimss.pagos.model.request.FiltroRequest;
 
 public class PagosUtil {
@@ -10,6 +11,8 @@ public class PagosUtil {
 			+ "FROM \r\n"
 			+ "(SELECT\r\n"
 			+ "PB.ID_PAGO_BITACORA AS idPagoBitacora,\r\n"
+			+ "PB.ID_FLUJO_PAGOS AS idFlujoPago,\r\n"
+			+ "PB.ID_REGISTRO AS idRegistro,\r\n"
 			+ "PB.FEC_ODS AS fechaPago,\r\n"
 			+ "PB.CVE_FOLIO AS folio,\r\n"
 			+ "CONCAT('Pago de ' , FP.DESC_FLUJO_PAGOS) AS tipoPago,\r\n"
@@ -231,6 +234,63 @@ public class PagosUtil {
 				+ "ORDER BY RPF.FEC_ALTA ASC;";
 		return query;
 		
+	}
+	
+	public String crearDetalle(CrearRequest datos, Integer idUsuario) {
+		
+		QueryHelper q = new QueryHelper("INSERT INTO SVT_PAGO_DETALLE");
+		q.agregarParametroValues("ID_PAGO_BITACORA", "'" + datos.getIdPagoBitacora() + "'");
+		q.agregarParametroValues("ID_METODO_PAGO", "'" + datos.getIdMetodoPago() + "'");
+		q.agregarParametroValues("IMP_IMPORTE", datos.getImportePago().toString());
+		q.agregarParametroValues("NUM_AUTORIZACION", datos.getNumAutorizacion());
+		q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
+		q.agregarParametroValues("FEC_PAGO", "'" + datos.getFechaPago() + "'" );
+		
+		if( datos.getFechaValeAGF() != null ) {
+			q.agregarParametroValues("FEC_VALE_AGF", datos.getFechaValeAGF());
+		}
+		
+		q.agregarParametroValues("CVE_ESTATUS", "4" );
+		q.agregarParametroValues("ID_USUARIO_ALTA", idUsuario.toString() );
+		
+		return q.obtenerQueryInsertar();
+		
+	}
+	
+	public String totalPagado(String idPagoBitacora){
+		
+		StringBuilder query = new StringBuilder("SELECT IFNULL(\r\n"
+				+ "(SELECT SUM(PD.IMP_IMPORTE)\r\n"
+				+ "FROM  SVT_PAGO_DETALLE PD\r\n"
+				+ "WHERE\r\n"
+				+ "PD.ID_PAGO_BITACORA = ");
+		query.append(idPagoBitacora);
+		query.append("), 0) AS totalPagado");
+		
+		
+		return query.toString();
+	}
+	
+	public String actODs(String idOds, Integer idUsuario) {
+		
+		QueryHelper q = new QueryHelper("UPDATE SVC_ORDEN_SERVICIO");
+		q.agregarParametroValues("ID_ESTATUS_ORDEN_SERVICIO", "4");
+		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
+		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
+		q.addWhere("ID_ORDEN_SERVICIO = " + idOds);
+	
+		return q.obtenerQueryActualizar();
+	}
+	
+	public String actPB(String idPb, Integer idUsuario) {
+		
+		QueryHelper q = new QueryHelper("UPDATE SVT_PAGO_BITACORA");
+		q.agregarParametroValues("CVE_ESTATUS_PAGO", "4");
+		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
+		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
+		q.addWhere("ID_PAGO_BITACORA = " + idPb);
+	
+		return q.obtenerQueryActualizar();
 	}
 	
 }
