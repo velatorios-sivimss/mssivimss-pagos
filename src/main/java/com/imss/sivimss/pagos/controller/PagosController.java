@@ -113,6 +113,17 @@ public class PagosController {
 		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
 	}
 	
+
+	@PostMapping("/crear")
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	public CompletableFuture<Object> crear(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		Response<?> response =   pagosService.crear(request,authentication);
+		
+		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
 	/**
 	 * fallbacks generico
 	 * 
