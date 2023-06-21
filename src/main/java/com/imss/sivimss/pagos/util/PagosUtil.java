@@ -20,7 +20,8 @@ public class PagosUtil {
 			+ "IFNULL( (SELECT SUM(PD.IMP_IMPORTE)\r\n"
 			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
 			+ "WHERE \r\n"
-			+ "PD.ID_PAGO_BITACORA = idPagoBitacora), 0) AS totalPagado\r\n"
+			+ "PD.ID_PAGO_BITACORA = idPagoBitacora "
+			+ "AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado\r\n"
 			+ "FROM SVT_PAGO_BITACORA PB\r\n"
 			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n";
 	
@@ -42,7 +43,8 @@ public class PagosUtil {
 				+ "GROUP_CONCAT( MP.DESC_METODO_PAGO SEPARATOR ', ' )\r\n"
 				+ "FROM SVC_METODO_PAGO MP\r\n"
 				+ "INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO\r\n"
-				+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+				+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora "
+				+ "AND PD.CVE_ESTATUS = '4' \r\n"
 				+ " ) AS metodoPago,\r\n"
 				+ "PB.DESC_VALOR AS total, \r\n"
 				+ "EOS.DES_ESTATUS AS estatus, \r\n"
@@ -53,7 +55,7 @@ public class PagosUtil {
 				+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOS ON EOS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO \r\n"
 				+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOSP ON EOSP.ID_ESTATUS_ORDEN_SERVICIO = PB.CVE_ESTATUS_PAGO\r\n"
 				+ "WHERE \r\n"
-				+ "OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2)\r\n"
+				+ "OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2,4)\r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '1' )\r\n"
 				+ "UNION ALL\r\n"
 				+ "(\r\n"
@@ -68,7 +70,8 @@ public class PagosUtil {
 				+ "GROUP_CONCAT( MP.DESC_METODO_PAGO SEPARATOR ', ' )\r\n"
 				+ "FROM SVC_METODO_PAGO MP\r\n"
 				+ "INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO\r\n"
-				+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+				+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora "
+				+ "AND PD.CVE_ESTATUS = '4' \r\n"
 				+ " ) AS metodoPago,\r\n"
 				+ "PB.DESC_VALOR AS total, \r\n"
 				+ "ECPF.DES_ESTATUS AS estatus, \r\n"
@@ -95,7 +98,8 @@ public class PagosUtil {
 				+ "GROUP_CONCAT( MP.DESC_METODO_PAGO SEPARATOR ', ' )\r\n"
 				+ "FROM SVC_METODO_PAGO MP\r\n"
 				+ "INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO\r\n"
-				+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+				+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora "
+				+ "AND PD.CVE_ESTATUS = '4' \r\n"
 				+ " ) AS metodoPago,\r\n"
 				+ "PB.DESC_VALOR AS total, \r\n"
 				+ "'vigente' AS estatus, \r\n"
@@ -165,7 +169,7 @@ public class PagosUtil {
 		case 1: query = query + "INNER JOIN SVC_ORDEN_SERVICIO OS ON OS.ID_ORDEN_SERVICIO = PB.ID_REGISTRO\r\n"
 				+ "WHERE\r\n"
 				+ "PB.ID_FLUJO_PAGOS = '1'\r\n"
-				+ "AND OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2)\r\n"
+				+ "AND OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2,4)\r\n"
 				+ ") T";
 		break;
 		case 2: query = query + "INNER JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF =PB.ID_REGISTRO\r\n"
@@ -195,7 +199,7 @@ public class PagosUtil {
 				+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOS ON EOS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO\r\n"
 				+ "INNER JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO \r\n"
 				+ "WHERE\r\n"
-				+ "OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2)\r\n"
+				+ "OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2,4)\r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '1' \r\n"
 				+ "ORDER BY OS.FEC_ALTA ASC";
 		return query;
@@ -242,12 +246,16 @@ public class PagosUtil {
 		q.agregarParametroValues("ID_PAGO_BITACORA", "'" + datos.getIdPagoBitacora() + "'");
 		q.agregarParametroValues("ID_METODO_PAGO", "'" + datos.getIdMetodoPago() + "'");
 		q.agregarParametroValues("IMP_IMPORTE", datos.getImportePago().toString());
-		q.agregarParametroValues("NUM_AUTORIZACION", datos.getNumAutorizacion());
+		q.agregarParametroValues("NUM_AUTORIZACION", "'" + datos.getNumAutorizacion() + "'");
 		q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
-		q.agregarParametroValues("FEC_PAGO", "'" + datos.getFechaPago() + "'" );
+		
+		if( datos.getFechaPago() != null ) {	
+			q.agregarParametroValues("FEC_PAGO", "'" + datos.getFechaPago() + "'" );
+		}
+		
 		
 		if( datos.getFechaValeAGF() != null ) {
-			q.agregarParametroValues("FEC_VALE_AGF", datos.getFechaValeAGF());
+			q.agregarParametroValues("FEC_VALE_AGF", "'" + datos.getFechaValeAGF() + "'");
 		}
 		
 		q.agregarParametroValues("CVE_ESTATUS", "4" );
@@ -265,8 +273,7 @@ public class PagosUtil {
 				+ "WHERE\r\n"
 				+ "PD.ID_PAGO_BITACORA = ");
 		query.append(idPagoBitacora);
-		query.append("), 0) AS totalPagado");
-		
+		query.append(" AND PD.CVE_ESTATUS = '4' ), 0) AS totalPagado");
 		
 		return query.toString();
 	}
