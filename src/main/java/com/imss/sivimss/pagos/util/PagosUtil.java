@@ -246,13 +246,18 @@ public class PagosUtil {
 		q.agregarParametroValues("ID_PAGO_BITACORA", "'" + datos.getIdPagoBitacora() + "'");
 		q.agregarParametroValues("ID_METODO_PAGO", "'" + datos.getIdMetodoPago() + "'");
 		q.agregarParametroValues("IMP_IMPORTE", datos.getImportePago().toString());
-		q.agregarParametroValues("NUM_AUTORIZACION", "'" + datos.getNumAutorizacion() + "'");
-		q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
+		
+		if( datos.getNumAutorizacion()!= null ) {
+			q.agregarParametroValues("NUM_AUTORIZACION", "'" + datos.getNumAutorizacion() + "'");
+		}
+		
+		if( datos.getDescBanco() !=null ) {
+			q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
+		}
 		
 		if( datos.getFechaPago() != null ) {	
 			q.agregarParametroValues("FEC_PAGO", "'" + datos.getFechaPago() + "'" );
 		}
-		
 		
 		if( datos.getFechaValeAGF() != null ) {
 			q.agregarParametroValues("FEC_VALE_AGF", "'" + datos.getFechaValeAGF() + "'");
