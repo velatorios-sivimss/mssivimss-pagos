@@ -169,7 +169,7 @@ public class PagosUtil {
 		case 1: query = query + "INNER JOIN SVC_ORDEN_SERVICIO OS ON OS.ID_ORDEN_SERVICIO = PB.ID_REGISTRO\r\n"
 				+ "WHERE\r\n"
 				+ "PB.ID_FLUJO_PAGOS = '1'\r\n"
-				+ "AND OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2,4)\r\n"
+				+ "AND OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2)\r\n"
 				+ ") T";
 		break;
 		case 2: query = query + "INNER JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF =PB.ID_REGISTRO\r\n"
@@ -305,4 +305,46 @@ public class PagosUtil {
 		return q.obtenerQueryActualizar();
 	}
 	
+	public String registroDetalle(String idPagoBitacora){
+		
+		StringBuilder query = new StringBuilder("SELECT \r\n"
+				+ "T.*,\r\n"
+				+ "(T.totalAPagar - T.totalPagado) AS totalPorCubrir\r\n"
+				+ "FROM \r\n"
+				+ "(SELECT\r\n"
+				+ "PB.CVE_FOLIO AS folio,\r\n"
+				+ "CAST(PB.DESC_VALOR AS double) AS totalAPagar,\r\n"
+				+ "IFNULL( (SELECT SUM(PD.IMP_IMPORTE)\r\n"
+				+ "FROM SVT_PAGO_DETALLE PD \r\n"
+				+ "WHERE \r\n"
+				+ "PD.ID_PAGO_BITACORA = ");
+		query.append(idPagoBitacora);
+		query.append(" AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado\r\n"
+				+ "FROM SVT_PAGO_BITACORA PB\r\n"
+				+ "WHERE\r\n"
+				+ "PB.ID_PAGO_BITACORA = 3\r\n"
+				+ ") T");
+		
+		return query.toString();
+	}
+	
+	public String pagoDetalle(String idPagoBitacora){
+		
+		StringBuilder query = new StringBuilder("SELECT\r\n"
+				+ "PD.ID_PAGO_DETALLE AS idPagoDetalle,\r\n"
+				+ "MP.DESC_METODO_PAGO AS metodoPago,\r\n"
+				+ "PD.IMP_IMPORTE AS importe,\r\n"
+				+ "PD.NUM_AUTORIZACION AS numAutorizacion,\r\n"
+				+ "PD.DES_BANCO AS nomBanco,\r\n"
+				+ "PD.FEC_PAGO AS fechaPago,\r\n"
+				+ "PD.FEC_VALE_AGF AS fechaValeParAGF\r\n"
+				+ "FROM \r\n"
+				+ "SVT_PAGO_DETALLE PD\r\n"
+				+ "INNER JOIN SVC_METODO_PAGO MP ON MP.ID_METODO_PAGO = PD.ID_METODO_PAGO\r\n"
+				+ "WHERE ID_PAGO_BITACORA = ");
+		query.append(idPagoBitacora);
+		query.append(" AND PD.CVE_ESTATUS = 4");
+		
+		return query.toString();
+	}
 }

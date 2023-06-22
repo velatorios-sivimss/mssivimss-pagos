@@ -20,6 +20,7 @@ import com.imss.sivimss.pagos.service.PagosService;
 import com.imss.sivimss.pagos.util.DatosRequest;
 import com.imss.sivimss.pagos.util.Response;
 import com.imss.sivimss.pagos.model.request.UsuarioDto;
+import com.imss.sivimss.pagos.model.response.DetalleResponse;
 import com.imss.sivimss.pagos.util.MensajeResponseUtil;
 import com.imss.sivimss.pagos.util.ProviderServiceRestTemplate;
 import com.imss.sivimss.pagos.util.LogUtil;
@@ -199,10 +200,46 @@ public class PagosServiceImpl implements PagosService {
 	
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Response<Object> obtenerPorId(DatosRequest request, Authentication authentication) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Gson gson = new Gson();
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
+		PagosUtil pagosUtil = new PagosUtil();
+		Response<Object> response;
+		List<Map<String, Object>> listadatos;
+		DetalleResponse detalle;
+		String query = pagosUtil.registroDetalle(crearRequest.getIdPagoBitacora() );
+		
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+		
+		request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
+		
+		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+				authentication);
+		
+		listadatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
+		
+		detalle = gson.fromJson(String.valueOf(listadatos.get(0)), DetalleResponse.class);
+		
+		query = pagosUtil.pagoDetalle(crearRequest.getIdPagoBitacora() );
+		
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+		
+		request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
+		
+		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+				authentication);
+		
+		listadatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
+		
+		detalle.setMetodosPago(listadatos);
+		
+		response.setDatos(detalle);
+		return response;
 	}
 
 	@Override
