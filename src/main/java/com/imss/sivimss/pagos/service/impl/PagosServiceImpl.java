@@ -297,4 +297,45 @@ public class PagosServiceImpl implements PagosService {
 		
 	}
 
+	@Override
+	public Response<Object> eliminar(DatosRequest request, Authentication authentication) throws IOException {
+		
+		Gson gson = new Gson();
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
+		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
+		PagosUtil pagosUtil = new PagosUtil();
+		Response<Object> response;
+		String query = pagosUtil.eliminar(crearRequest.getIdPagoDetalle(), usuarioDto.getIdUsuario() );
+
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+		
+		request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
+		
+		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+				authentication);
+		
+		return response;
+	}
+
+	@Override
+	public Response<Object> actualizar(DatosRequest request, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
+		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
+		PagosUtil pagosUtil = new PagosUtil();
+		Response<Object> response;
+		String query = pagosUtil.actualizar(crearRequest, usuarioDto.getIdUsuario() );
+
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+		
+		request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
+		
+		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+				authentication);
+		
+		return response;
+	}
+
 }

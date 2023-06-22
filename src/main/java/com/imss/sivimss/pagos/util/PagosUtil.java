@@ -347,4 +347,76 @@ public class PagosUtil {
 		
 		return query.toString();
 	}
+	
+	public String eliminar(String idPagoDetalle, Integer idUsuario) {
+		
+		QueryHelper q = new QueryHelper("UPDATE SVT_PAGO_DETALLE");
+		q.agregarParametroValues("CVE_ESTATUS", "0");
+		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
+		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
+		q.addWhere("ID_PAGO_DETALLE = " + idPagoDetalle);
+	
+		return q.obtenerQueryActualizar();
+		
+	}
+	
+	public String actualizar(CrearRequest datos, Integer idUsuario) {
+		
+		QueryHelper q = new QueryHelper("UPDATE SVT_PAGO_DETALLE");
+		q.agregarParametroValues("IMP_IMPORTE", datos.getImportePago().toString());
+		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
+		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
+		
+		if( datos.getCambioMetPago() ) {
+			
+			q.agregarParametroValues("ID_METODO_PAGO", "'" + datos.getIdMetodoPago() + "'");
+			
+			if( datos.getNumAutorizacion()!= null ) {
+				q.agregarParametroValues("NUM_AUTORIZACION", "'" + datos.getNumAutorizacion() + "'");
+			} else {
+				q.agregarParametroValues("NUM_AUTORIZACION", "null");
+			}
+			
+			if( datos.getDescBanco() !=null ) {
+				q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
+			} else {
+				q.agregarParametroValues("DES_BANCO", "null");
+			}
+			
+			if( datos.getFechaPago() != null ) {	
+				q.agregarParametroValues("FEC_PAGO", "'" + datos.getFechaPago() + "'" );
+			} else {
+				q.agregarParametroValues("FEC_PAGO", "null" );
+			}
+			
+			if( datos.getFechaValeAGF() != null ) {
+				q.agregarParametroValues("FEC_VALE_AGF", "'" + datos.getFechaValeAGF() + "'");
+			} else {
+				q.agregarParametroValues("FEC_VALE_AGF", "null");
+			}
+			
+		}else {
+			
+			if( datos.getNumAutorizacion()!= null ) {
+				q.agregarParametroValues("NUM_AUTORIZACION", "'" + datos.getNumAutorizacion() + "'");
+			}
+			
+			if( datos.getDescBanco() !=null ) {
+				q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
+			}
+			
+			if( datos.getFechaPago() != null ) {	
+				q.agregarParametroValues("FEC_PAGO", "'" + datos.getFechaPago() + "'" );
+			}
+			
+			if( datos.getFechaValeAGF() != null ) {
+				q.agregarParametroValues("FEC_VALE_AGF", "'" + datos.getFechaValeAGF() + "'");
+			}
+			
+		}
+		
+		q.addWhere("ID_PAGO_DETALLE = " + datos.getIdPagoDetalle());
+		return q.obtenerQueryActualizar();
+		
+	}
 }

@@ -18,4 +18,6 @@ public interface PagosService {
 	Response<Object> consultaFolOds(DatosRequest request, Authentication authentication) throws IOException;
 	Response<Object> consultaFolPf(DatosRequest request, Authentication authentication) throws IOException;
 	Response<Object> consultaFolRpf(DatosRequest request, Authentication authentication) throws IOException;
+	Response<Object> eliminar(DatosRequest request, Authentication authentication) throws IOException;
+	Response<Object> actualizar(DatosRequest request, Authentication authentication) throws IOException;
 }
