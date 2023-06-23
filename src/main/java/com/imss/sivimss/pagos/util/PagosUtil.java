@@ -34,6 +34,7 @@ public class PagosUtil {
 				+ "(\r\n"
 				+ "( SELECT \r\n"
 				+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
+				+ "PB.ID_VELATORIO AS idVelatorio, \r\n"
 				+ "PB.FEC_ODS AS fecha, \r\n"
 				+ "PB.CVE_FOLIO AS folio, \r\n"
 				+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
@@ -61,6 +62,7 @@ public class PagosUtil {
 				+ "(\r\n"
 				+ "SELECT \r\n"
 				+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
+				+ "PB.ID_VELATORIO AS idVelatorio, \r\n"
 				+ "PB.FEC_ODS AS fecha, \r\n"
 				+ "PB.CVE_FOLIO AS folio, \r\n"
 				+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
@@ -89,6 +91,7 @@ public class PagosUtil {
 				+ "(\r\n"
 				+ "SELECT \r\n"
 				+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
+				+ "PB.ID_VELATORIO AS idVelatorio, \r\n"
 				+ "PB.FEC_ODS AS fecha, \r\n"
 				+ "PB.CVE_FOLIO AS folio, \r\n"
 				+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
@@ -117,26 +120,53 @@ public class PagosUtil {
 				);
 		if( validarWhere(filtros) ) {
 			
-			query.append( "WHERE " );
-		
+			query.append( " WHERE " );
+			
+			int i=0;
+			
+			
 			if( (filtros.getIdVelatorio()!=null && !filtros.getIdVelatorio().isEmpty() )) {
-				query.append( "T.ID_VELATORIO = '" + filtros.getIdVelatorio() + "' " );
+				query.append( "T.idVelatorio = '" + filtros.getIdVelatorio() + "' " );
+				i++;
 			}
 			
 			if( (filtros.getIdFlujoPagos()!=null && !filtros.getIdFlujoPagos().isEmpty() )) {
-				query.append( "AND T.ID_FLUJO_PAGOS = '" + filtros.getIdFlujoPagos() +"' " );
+				
+				if(i>=1) {
+					query.append( "AND ");
+				}
+				
+				query.append( "T.idFlujoPagos = '" + filtros.getIdFlujoPagos() +"' " );
+				i++;
 			}
 			
 			if( (filtros.getFolio()!=null && !filtros.getFolio().isEmpty() )) {
-				query.append( "AND T.CVE_FOLIO LIKE CONCAT('" + filtros.getFolio() + "', '%') " );
+				
+				if(i>=1) {
+					query.append( "AND ");
+				}
+				
+				query.append( "T.folio LIKE CONCAT('" + filtros.getFolio() + "', '%') " );
+				i++;
 			}
 			
 			if( (filtros.getNomContratante()!=null && !filtros.getNomContratante().isEmpty() ) ) {
-				query.append( "AND T.NOM_CONTRATANTE LIKE CONCAT('"+ filtros.getNomContratante() + "', '%') " );
+				
+				if(i>=1) {
+					query.append( "AND ");
+				}
+				
+				query.append( "T.nomContratante LIKE CONCAT('"+ filtros.getNomContratante() + "', '%') " );
+				i++;
 			}
 			
 			if( (filtros.getFechaInicio()!=null && !filtros.getFechaInicio().isEmpty() ) ) {
-				query.append( "AND T.FEC_ODS BETWEEN '" + filtros.getFechaInicio() + "' AND '" + filtros.getFechaFin() + "' " );
+				
+				if(i>=1) {
+					query.append( "AND ");
+				}
+				
+				query.append( "T.fecha BETWEEN '" + filtros.getFechaInicio() + "' AND '" + filtros.getFechaFin() + "' " );
 			}
 			
 		}
