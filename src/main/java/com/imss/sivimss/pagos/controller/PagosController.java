@@ -134,6 +134,26 @@ public class PagosController {
 		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
 	}
 	
+	@PostMapping("/eliminar")
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	public CompletableFuture<Object> eliminar(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		Response<?> response =   pagosService.eliminar(request,authentication);
+		
+		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
+	@PostMapping("/actualizar")
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	public CompletableFuture<Object> actualizar(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		Response<?> response =   pagosService.actualizar(request,authentication);
+		
+		return CompletableFuture.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
 	/**
 	 * fallbacks generico
 	 * 

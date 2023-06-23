@@ -20,11 +20,13 @@ public class CrearRequest {
 	private String idMetodoPago;
 	private Integer idFlujoPago;
 	private String idRegistro;
+	private String idPagoDetalle;
 	private Double importePago;
 	private String numAutorizacion;
 	private String descBanco;
 	private String fechaPago;
 	private String fechaValeAGF;
 	private Double importeRegistro;
+	private Boolean cambioMetPago;
 	
 }

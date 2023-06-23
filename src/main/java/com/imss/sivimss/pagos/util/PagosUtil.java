@@ -313,7 +313,10 @@ public class PagosUtil {
 				+ "FROM \r\n"
 				+ "(SELECT\r\n"
 				+ "PB.CVE_FOLIO AS folio,\r\n"
+				+ "PB.CVE_ESTATUS_PAGO AS idEstatusPago,\r\n"
+				+ "EOS.DES_ESTATUS AS estatusPago,\r\n"
 				+ "CAST(PB.DESC_VALOR AS double) AS totalAPagar,\r\n"
+				+ "CONCAT('\"', FP.DESC_FLUJO_PAGOS,'\"') AS tipoPago,\r\n"
 				+ "IFNULL( (SELECT SUM(PD.IMP_IMPORTE)\r\n"
 				+ "FROM SVT_PAGO_DETALLE PD \r\n"
 				+ "WHERE \r\n"
@@ -321,9 +324,12 @@ public class PagosUtil {
 		query.append(idPagoBitacora);
 		query.append(" AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado\r\n"
 				+ "FROM SVT_PAGO_BITACORA PB\r\n"
+				+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOS ON EOS.ID_ESTATUS_ORDEN_SERVICIO = PB.CVE_ESTATUS_PAGO\r\n"
+				+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
 				+ "WHERE\r\n"
-				+ "PB.ID_PAGO_BITACORA = 3\r\n"
-				+ ") T");
+				+ "PB.ID_PAGO_BITACORA = ");
+		query.append(idPagoBitacora);
+		query.append( ") T");
 		
 		return query.toString();
 	}
@@ -333,18 +339,94 @@ public class PagosUtil {
 		StringBuilder query = new StringBuilder("SELECT\r\n"
 				+ "PD.ID_PAGO_DETALLE AS idPagoDetalle,\r\n"
 				+ "MP.DESC_METODO_PAGO AS metodoPago,\r\n"
+				+ "PD.ID_METODO_PAGO AS idMetodoPago,\r\n"
 				+ "PD.IMP_IMPORTE AS importe,\r\n"
 				+ "PD.NUM_AUTORIZACION AS numAutorizacion,\r\n"
 				+ "PD.DES_BANCO AS nomBanco,\r\n"
 				+ "PD.FEC_PAGO AS fechaPago,\r\n"
-				+ "PD.FEC_VALE_AGF AS fechaValeParAGF\r\n"
+				+ "PD.FEC_VALE_AGF AS fechaValeParAGF,\r\n"
+				+ "PD.CVE_ESTATUS AS idEstatusPago,\r\n"
+				+ "EOS.DES_ESTATUS AS estatusPago\r\n"
 				+ "FROM \r\n"
 				+ "SVT_PAGO_DETALLE PD\r\n"
 				+ "INNER JOIN SVC_METODO_PAGO MP ON MP.ID_METODO_PAGO = PD.ID_METODO_PAGO\r\n"
+				+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOS ON EOS.ID_ESTATUS_ORDEN_SERVICIO = PD.CVE_ESTATUS\r\n"
 				+ "WHERE ID_PAGO_BITACORA = ");
 		query.append(idPagoBitacora);
 		query.append(" AND PD.CVE_ESTATUS = 4");
 		
 		return query.toString();
+	}
+	
+	public String eliminar(String idPagoDetalle, Integer idUsuario) {
+		
+		QueryHelper q = new QueryHelper("UPDATE SVT_PAGO_DETALLE");
+		q.agregarParametroValues("CVE_ESTATUS", "0");
+		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
+		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
+		q.addWhere("ID_PAGO_DETALLE = " + idPagoDetalle);
+	
+		return q.obtenerQueryActualizar();
+		
+	}
+	
+	public String actualizar(CrearRequest datos, Integer idUsuario) {
+		
+		QueryHelper q = new QueryHelper("UPDATE SVT_PAGO_DETALLE");
+		q.agregarParametroValues("IMP_IMPORTE", datos.getImportePago().toString());
+		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
+		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
+		
+		if( datos.getCambioMetPago() ) {
+			
+			q.agregarParametroValues("ID_METODO_PAGO", "'" + datos.getIdMetodoPago() + "'");
+			
+			if( datos.getNumAutorizacion()!= null ) {
+				q.agregarParametroValues("NUM_AUTORIZACION", "'" + datos.getNumAutorizacion() + "'");
+			} else {
+				q.agregarParametroValues("NUM_AUTORIZACION", "null");
+			}
+			
+			if( datos.getDescBanco() !=null ) {
+				q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
+			} else {
+				q.agregarParametroValues("DES_BANCO", "null");
+			}
+			
+			if( datos.getFechaPago() != null ) {	
+				q.agregarParametroValues("FEC_PAGO", "'" + datos.getFechaPago() + "'" );
+			} else {
+				q.agregarParametroValues("FEC_PAGO", "null" );
+			}
+			
+			if( datos.getFechaValeAGF() != null ) {
+				q.agregarParametroValues("FEC_VALE_AGF", "'" + datos.getFechaValeAGF() + "'");
+			} else {
+				q.agregarParametroValues("FEC_VALE_AGF", "null");
+			}
+			
+		}else {
+			
+			if( datos.getNumAutorizacion()!= null ) {
+				q.agregarParametroValues("NUM_AUTORIZACION", "'" + datos.getNumAutorizacion() + "'");
+			}
+			
+			if( datos.getDescBanco() !=null ) {
+				q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
+			}
+			
+			if( datos.getFechaPago() != null ) {	
+				q.agregarParametroValues("FEC_PAGO", "'" + datos.getFechaPago() + "'" );
+			}
+			
+			if( datos.getFechaValeAGF() != null ) {
+				q.agregarParametroValues("FEC_VALE_AGF", "'" + datos.getFechaValeAGF() + "'");
+			}
+			
+		}
+		
+		q.addWhere("ID_PAGO_DETALLE = " + datos.getIdPagoDetalle());
+		return q.obtenerQueryActualizar();
+		
 	}
 }

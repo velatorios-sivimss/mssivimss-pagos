@@ -15,8 +15,11 @@ import java.util.Map;
 public class DetalleResponse {
 	
 	private String folio;
+	private String idEstatusPago;
+	private String estatusPago;
 	private Double totalAPagar;
 	private Double totalPagado;
 	private Double totalPorCubrir;
+	private String tipoPago;
 	private List<Map<String, Object>> metodosPago;
 }
