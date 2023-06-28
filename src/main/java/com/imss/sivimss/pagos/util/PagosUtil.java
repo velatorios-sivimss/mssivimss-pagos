@@ -459,4 +459,17 @@ public class PagosUtil {
 		return q.obtenerQueryActualizar();
 		
 	}
+	
+	public String eliminarTodos(String idPagoBitacora, Integer idUsuario) {
+		
+		QueryHelper q = new QueryHelper("UPDATE SVT_PAGO_DETALLE");
+		q.agregarParametroValues("CVE_ESTATUS", "0");
+		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
+		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
+		q.addWhere("ID_PAGO_BITACORA = " + idPagoBitacora);
+		q.addWhere("AND CVE_ESTATUS = 4");
+	
+		return q.obtenerQueryActualizar();
+		
+	}
 }
