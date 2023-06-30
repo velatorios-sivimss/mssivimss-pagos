@@ -19,4 +19,6 @@ public interface GestionarService {
 	
 	Response<Object> busqueda(DatosRequest request, Authentication authentication) throws IOException;
 	
+	Response<Object> detalle(DatosRequest request, Authentication authentication) throws IOException;
+	
 }

@@ -1,18 +1,23 @@
 package com.imss.sivimss.pagos.service.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.logging.Level;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 import com.imss.sivimss.pagos.model.request.BusquedaDto;
+import com.imss.sivimss.pagos.model.request.GestionPagoDto;
 import com.imss.sivimss.pagos.util.AppConstantes;
+import com.imss.sivimss.pagos.exception.BadRequestException;
 import com.imss.sivimss.pagos.beans.GestionarPagos;
 import com.imss.sivimss.pagos.service.GestionarService;
 import com.imss.sivimss.pagos.util.DatosRequest;
@@ -30,7 +35,7 @@ public class GestionarServiceImpl implements GestionarService {
 	
 	private static final String CONSULTA = "/consulta";
 	
-	@Value("${endpoints.generico-reportes}")
+	@Value("${endpoints.ms-reportes}")
 	private String urlReportes;
 	
 	@Value("${formato_fecha}")
@@ -58,7 +63,7 @@ public class GestionarServiceImpl implements GestionarService {
 		try {
 		    response = providerRestTemplate.consumirServicio(gestionPagos.foliosOds(busqueda).getDatos(), urlDominio + CONSULTA, authentication);
 		} catch (Exception e) {
-        	log.error(e.getMessage());
+			log.error(e.getMessage());
         	logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), CONSULTA, authentication);
 			return null;
         }
@@ -111,25 +116,64 @@ public class GestionarServiceImpl implements GestionarService {
 		Gson gson = new Gson();
 		GestionarPagos gestionPagos = new GestionarPagos();
 		
+		String datosJson = String.valueOf(authentication.getPrincipal());
+		BusquedaDto busqueda = gson.fromJson(datosJson, BusquedaDto.class);
+		Response<Object> response = null;
+		
+		try {
+			response = providerRestTemplate.consumirServicio(gestionPagos.consultaPagos(request, busqueda, formatoFecha).getDatos(), urlDominio + PAGINADO, authentication);
+		} catch (Exception e) {
+        	log.error(e.getMessage());
+        	logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), PAGINADO, authentication);
+			return null;
+        }
+		
+		return response;
+	}
+
+	@Override
+	public Response<Object> busqueda(DatosRequest request, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+		GestionarPagos gestionPagos = new GestionarPagos();
+		
 		String datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
 		BusquedaDto busqueda = gson.fromJson(datosJson, BusquedaDto.class);
 		Response<Object> response = null;
 		
 		try {
-			response = providerRestTemplate.consumirServicio(gestionPagos.consultaPagos(request, busqueda).getDatos(), urlDominio + CONSULTA, authentication);
+			response = providerRestTemplate.consumirServicio(gestionPagos.buscaPagos(request, busqueda, formatoFecha).getDatos(), urlDominio + PAGINADO, authentication);
+			ArrayList datos1 = (ArrayList) ((LinkedHashMap) response.getDatos()).get("content");
+			if (datos1.isEmpty()) {
+				response.setMensaje(INFONOENCONTRADA);
+		    }
 		} catch (Exception e) {
         	log.error(e.getMessage());
-        	logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), CONSULTA, authentication);
+        	logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), PAGINADO, authentication);
 			return null;
         }
 		
-		return null;
+		return response;
 	}
 
 	@Override
-	public Response<Object> busqueda(DatosRequest request, Authentication authentication) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+	public Response<Object> detalle(DatosRequest request, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+
+		String datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		GestionPagoDto gestionPagoDto = gson.fromJson(datosJson, GestionPagoDto.class);
+		if (gestionPagoDto.getIdFlujo() == null || gestionPagoDto.getIdPago() == null) {
+			throw new BadRequestException(HttpStatus.BAD_REQUEST, "Informacion incompleta");
+		}
+		GestionarPagos gestionPagos = new GestionarPagos(gestionPagoDto.getIdFlujo(), gestionPagoDto.getIdPago());
+		
+		try {
+		    return providerRestTemplate.consumirServicio(gestionPagos.detalleGeneral(request, formatoFecha).getDatos(), urlDominio + CONSULTA, authentication);
+		} catch (Exception e) {
+			    log.error(e.getMessage());
+		        logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), CONSULTA, authentication);
+				return null;
+		}
+
 	}
 
 }

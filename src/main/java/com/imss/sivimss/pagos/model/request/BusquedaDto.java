@@ -15,12 +15,13 @@ import lombok.Setter;
 public class BusquedaDto {
 	
 	private Integer idOficina;
+	private Integer idDelegacion;
 	private Integer idVelatorio;
 	private String folioODS;
 	private String folioPF;
 	private String folioRPF;
 	private String nomContratante;
-	private String fecIniODS;
-	private String fecFinODS;
+	private String fechaIni;
+	private String fechaFin;
 
 }

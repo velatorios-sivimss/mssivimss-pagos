@@ -64,7 +64,7 @@ public class GestionarController {
 	@PostMapping("/lista-rpf")
 	public CompletableFuture<Object> listaRpf(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
 		
-		Response<?> response = gestionarService.listadoPf(request, authentication);
+		Response<?> response = gestionarService.listadoRpf(request, authentication);
 		return CompletableFuture
 				.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
 	}
@@ -87,6 +87,17 @@ public class GestionarController {
 	public CompletableFuture<Object> busqueda(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
 		
 		Response<?> response = gestionarService.busqueda(request, authentication);
+		return CompletableFuture
+				.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	@PostMapping("/detalle")
+	public CompletableFuture<Object> detalle(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		
+		Response<?> response = gestionarService.detalle(request, authentication);
 		return CompletableFuture
 				.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
 	}
