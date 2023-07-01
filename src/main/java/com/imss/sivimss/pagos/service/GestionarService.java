@@ -21,4 +21,6 @@ public interface GestionarService {
 	
 	Response<Object> detalle(DatosRequest request, Authentication authentication) throws IOException;
 	
+	Response<Object> descargarDocumento(DatosRequest request, Authentication authentication) throws IOException;
+	
 }

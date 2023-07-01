@@ -23,5 +23,6 @@ public class BusquedaDto {
 	private String nomContratante;
 	private String fechaIni;
 	private String fechaFin;
+	private String tipoReporte;
 
 }
