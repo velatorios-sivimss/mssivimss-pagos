@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.imss.sivimss.pagos.model.request.BusquedaDto;
 import com.imss.sivimss.pagos.model.request.GestionPagoDto;
 import com.imss.sivimss.pagos.model.response.DetPagoResponse;
+import com.imss.sivimss.pagos.model.response.ModificaResponse;
 import com.imss.sivimss.pagos.util.AppConstantes;
 import com.imss.sivimss.pagos.exception.BadRequestException;
 import com.imss.sivimss.pagos.util.MensajeResponseUtil;
@@ -30,6 +31,7 @@ import com.imss.sivimss.pagos.util.DatosRequest;
 import com.imss.sivimss.pagos.util.LogUtil;
 import com.imss.sivimss.pagos.util.ProviderServiceRestTemplate;
 import com.imss.sivimss.pagos.util.Response;
+import com.imss.sivimss.pagos.model.request.UsuarioDto;
 
 @Service
 public class GestionarServiceImpl implements GestionarService {
@@ -41,6 +43,8 @@ public class GestionarServiceImpl implements GestionarService {
 	
 	private static final String CONSULTA = "/consulta";
 	
+	private static final String ACTUALIZAR = "/actualizar";
+	
 	@Value("${endpoints.ms-reportes}")
 	private String urlReportes;
 	
@@ -50,6 +54,8 @@ public class GestionarServiceImpl implements GestionarService {
 	private static final String INFONOENCONTRADA = "45";
 	
 	private static final String ERROR_DESCARGA = "64";
+	
+	private static final String MODIFICACION = "modificacion";
 	
 	private static final String NOMBREPDFREPORTE = "reportes/generales/ReporteGeneraPagos.jrxml";
 	
@@ -209,6 +215,30 @@ public class GestionarServiceImpl implements GestionarService {
 		
 		return response;
 
+	}
+	
+	@Override
+	public Response<Object> modifica(DatosRequest request, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+		
+		String datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
+
+		datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		ModificaResponse modificaResponse = gson.fromJson(datosJson, ModificaResponse.class);
+		modificaResponse.setIdUsuarioModifica(usuarioDto.getIdUsuario());
+		if (modificaResponse.getIdPagoDetalle() == null || modificaResponse.getMotivoModifica() == null) {
+			throw new BadRequestException(HttpStatus.BAD_REQUEST, "Informacion incompleta");
+		}
+		GestionarPagos gestionPagos = new GestionarPagos();
+		try {
+			return providerRestTemplate.consumirServicio(gestionPagos.modifica(modificaResponse).getDatos(), urlDominio + ACTUALIZAR, authentication);
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), MODIFICACION, authentication);
+			return null;
+		}
+				
 	}
 	
 	@Override

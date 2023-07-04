@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.xml.bind.DatatypeConverter;
 
 import com.imss.sivimss.pagos.model.request.BusquedaDto;
+import com.imss.sivimss.pagos.model.response.ModificaResponse;
 import com.imss.sivimss.pagos.util.AppConstantes;
 import com.imss.sivimss.pagos.util.DatosRequest;
 
@@ -239,9 +240,9 @@ public class GestionarPagos {
     }
     
     public DatosRequest detallePagos(DatosRequest request, String formatoFecha, Integer idPagoBitacora) throws UnsupportedEncodingException {
-    	StringBuilder query = new StringBuilder("SELECT PD.ID_METODO_PAGO AS idMetodoPago, MP.DESC_METODO_PAGO AS desMetodoPago, PD.IMP_IMPORTE AS importe, ");
-    	query.append("DATE_FORMAT(PD.FEC_PAGO,'" + formatoFecha + "') AS fecPago, PD.NUM_AUTORIZACION AS numAutorizacion, PD.DES_BANCO AS desBanco, ");
-    	query.append("DATE_FORMAT(PD.FEC_VALE_AGF,'" + formatoFecha + "') AS fecValeAgf \n");
+    	StringBuilder query = new StringBuilder("SELECT PD.ID_PAGO_DETALLE AS idPagoDetalle, PD.ID_METODO_PAGO AS idMetodoPago, MP.DESC_METODO_PAGO AS desMetodoPago, ");
+    	query.append("PD.IMP_IMPORTE AS importe, DATE_FORMAT(PD.FEC_PAGO,'" + formatoFecha + "') AS fecPago, PD.NUM_AUTORIZACION AS numAutorizacion, ");
+    	query.append("PD.DES_BANCO AS desBanco, DATE_FORMAT(PD.FEC_VALE_AGF,'" + formatoFecha + "') AS fecValeAgf \n");
     	query.append("FROM SVT_PAGO_DETALLE PD ");
     	query.append("JOIN SVC_METODO_PAGO MP ON MP.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
     	query.append("WHERE ID_PAGO_BITACORA = " + idPagoBitacora);
@@ -249,6 +250,19 @@ public class GestionarPagos {
     	String encoded = DatatypeConverter.printBase64Binary(query.toString().getBytes("UTF-8"));
         request.getDatos().put(AppConstantes.QUERY, encoded);
 		
+		return request;
+    }
+    
+    public DatosRequest modifica(ModificaResponse modificaResponse) throws UnsupportedEncodingException {
+    	DatosRequest request = new DatosRequest();
+		Map<String, Object> parametro = new HashMap<>();
+		String query =" UPDATE SVT_PAGO_DETALLE SET ID_USUARIO_MODIFICA = " + modificaResponse.getIdUsuarioModifica() +
+				", FEC_ACTUALIZACION = CURRENT_TIMESTAMP(), DES_MOTIVO_MODIFICA = '" + modificaResponse.getMotivoModifica() + "' " +
+				"WHERE ID_PAGO_DETALLE = " + modificaResponse.getIdPagoDetalle();
+		
+		String encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
+		parametro.put(AppConstantes.QUERY, encoded);
+		request.setDatos(parametro);
 		return request;
     }
     
@@ -331,8 +345,7 @@ public class GestionarPagos {
     }
     
     private StringBuilder consultaPf() {
-    	StringBuilder query = new StringBuilder("");
-    	query.append("SELECT PF.ID_CONVENIO_PF AS id, DATE_FORMAT(PF.FEC_ALTA,'" + formatoFecLocal + "') AS fecha, PF.DES_FOLIO AS folio, ");
+    	StringBuilder query = new StringBuilder("SELECT PF.ID_CONVENIO_PF AS id, DATE_FORMAT(PF.FEC_ALTA,'" + formatoFecLocal + "') AS fecha, PF.DES_FOLIO AS folio, ");
     	query.append("PB.NOM_CONTRATANTE AS nomContratante, 2 AS idFlujo, 'Pago de Prevision Funeraria' AS desFlujo, ");
     	query.append("SUM(PD.IMP_IMPORTE) AS total, PF.ID_ESTATUS_CONVENIO AS idEstatus, ");
     	query.append("ECPF.DES_ESTATUS desEstatus, PB.CVE_ESTATUS_PAGO AS idEstatusPago, ");

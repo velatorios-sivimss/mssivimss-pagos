@@ -1,0 +1,22 @@
+package com.imss.sivimss.pagos.model.response;
+
+import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ModificaResponse {
+	
+	private Integer idPagoDetalle;
+	private Integer idUsuarioModifica;
+	private String motivoModifica;
+
+}
