@@ -195,21 +195,24 @@ public class GestionarServiceImpl implements GestionarService {
 		
 		try {
 		    response = providerRestTemplate.consumirServicio(gestionPagos.detalleGeneral(request, formatoFecha).getDatos(), urlDominio + CONSULTA, authentication);
-		    listaDatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
-		    detalle.setFecha(listaDatos.get(0).get("fecha").toString());
-		    detalle.setFolio(listaDatos.get(0).get("folio").toString());
-		    detalle.setNomContratante(listaDatos.get(0).get("nomContratante").toString());
-		    detalle.setIdFlujo((Integer) listaDatos.get(0).get("idFlujo"));
-		    detalle.setDesFlujo(listaDatos.get(0).get("desFlujo").toString());
-		    detalle.setFecPago(listaDatos.get(0).get("fecPago").toString());
-		    detalle.setDesEstatus(listaDatos.get(0).get("desEstatus").toString());
-		    detalle.setDesEstatusPago(listaDatos.get(0).get("desEstatusPago").toString());
-		    detalle.setIdPagoBitacora((Integer) listaDatos.get(0).get("idPagoBitacora"));
+		    ArrayList datos1 = (ArrayList) response.getDatos();
+		    if (!datos1.isEmpty()) {
+			    listaDatos = Arrays.asList(modelMapper.map(datos1, Map[].class));
+			    detalle.setFecha(listaDatos.get(0).get("fecha").toString());
+			    detalle.setFolio(listaDatos.get(0).get("folio").toString());
+			    detalle.setNomContratante(listaDatos.get(0).get("nomContratante").toString());
+			    detalle.setIdFlujo((Integer) listaDatos.get(0).get("idFlujo"));
+			    detalle.setDesFlujo(listaDatos.get(0).get("desFlujo").toString());
+			    detalle.setFecPago(listaDatos.get(0).get("fecPago").toString());
+			    detalle.setDesEstatus(listaDatos.get(0).get("desEstatus").toString());
+			    detalle.setDesEstatusPago(listaDatos.get(0).get("desEstatusPago").toString());
+			    detalle.setIdPagoBitacora((Integer) listaDatos.get(0).get("idPagoBitacora"));
 		    
-		    response = providerRestTemplate.consumirServicio(gestionPagos.detallePagos(request, formatoFecha, detalle.getIdPagoBitacora()).getDatos(), urlDominio + CONSULTA, authentication);
-		    listaDatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
-		    detalle.setMetodosPago(listaDatos);
-		    response.setDatos(detalle);
+			    response = providerRestTemplate.consumirServicio(gestionPagos.detallePagos(request, formatoFecha, detalle.getIdPagoBitacora()).getDatos(), urlDominio + CONSULTA, authentication);
+			    listaDatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
+			    detalle.setMetodosPago(listaDatos);
+			    response.setDatos(detalle);
+		    }
 		
 		} catch (Exception e) {
 			    log.error(e.getMessage());
