@@ -245,7 +245,7 @@ public class GestionarPagos {
     	query.append("PD.DES_BANCO AS desBanco, DATE_FORMAT(PD.FEC_VALE_AGF,'" + formatoFecha + "') AS fecValeAgf \n");
     	query.append("FROM SVT_PAGO_DETALLE PD ");
     	query.append("JOIN SVC_METODO_PAGO MP ON MP.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
-    	query.append("WHERE ID_PAGO_BITACORA = " + idPagoBitacora);
+    	query.append("WHERE PD.ID_PAGO_BITACORA = " + idPagoBitacora);
     	
     	String encoded = DatatypeConverter.printBase64Binary(query.toString().getBytes("UTF-8"));
         request.getDatos().put(AppConstantes.QUERY, encoded);
@@ -263,6 +263,18 @@ public class GestionarPagos {
 		String encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
 		parametro.put(AppConstantes.QUERY, encoded);
 		request.setDatos(parametro);
+		return request;
+    }
+    
+    public DatosRequest validaCancela(DatosRequest request, Integer idPagoBitacora) throws UnsupportedEncodingException {
+    	StringBuilder query = new StringBuilder("SELECT COUNT(PD.ID_PAGO_DETALLE) AS total ");
+    	query.append("FROM SVT_PAGO_DETALLE PD ");
+    	query.append("WHERE ID_PAGO_BITACORA = " + idPagoBitacora);
+    	query.append(" AND ID_METODO_PAGO > 2");
+    	
+    	String encoded = DatatypeConverter.printBase64Binary(query.toString().getBytes("UTF-8"));
+        request.getDatos().put(AppConstantes.QUERY, encoded);
+		
 		return request;
     }
     
@@ -319,7 +331,7 @@ public class GestionarPagos {
 		
 		return envioDatos;
 	}
-		
+    
     private StringBuilder consultaOds() {
     	StringBuilder query = new StringBuilder("SELECT OS.ID_ORDEN_SERVICIO AS id, DATE_FORMAT(OS.FEC_ALTA,'" + formatoFecLocal + "') AS fecha, OS.CVE_FOLIO AS folio, ");
     	query.append("PB.NOM_CONTRATANTE AS nomContratante, 1 AS idFlujo, 'Pago de Orden de Servicio' AS desFlujo, ");

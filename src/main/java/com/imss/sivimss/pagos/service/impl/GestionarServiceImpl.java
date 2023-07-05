@@ -53,6 +53,10 @@ public class GestionarServiceImpl implements GestionarService {
 	
 	private static final String INFONOENCONTRADA = "45";
 	
+	private static final String AVISOCANCELACION = "123";
+	
+	private static final String AVISOMODIFICACION = "124";
+	
 	private static final String ERROR_DESCARGA = "64";
 	
 	private static final String MODIFICACION = "modificacion";
@@ -232,13 +236,46 @@ public class GestionarServiceImpl implements GestionarService {
 		}
 		GestionarPagos gestionPagos = new GestionarPagos();
 		try {
-			return providerRestTemplate.consumirServicio(gestionPagos.modifica(modificaResponse).getDatos(), urlDominio + ACTUALIZAR, authentication);
+			Response<Object> response = providerRestTemplate.consumirServicio(gestionPagos.modifica(modificaResponse).getDatos(), urlDominio + ACTUALIZAR, authentication);
+			if ((Boolean) response.getDatos()) {
+				response.setDatos(AVISOMODIFICACION);
+			}
+			return response;
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), MODIFICACION, authentication);
 			return null;
 		}
 				
+	}
+	
+	@Override
+	public Response<Object> valida(DatosRequest request, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+
+		String datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		GestionPagoDto gestionPagoDto = gson.fromJson(datosJson, GestionPagoDto.class);
+		if (gestionPagoDto.getIdPago() == null) {
+			throw new BadRequestException(HttpStatus.BAD_REQUEST, "Informacion incompleta");
+		}
+		
+		GestionarPagos gestionPagos = new GestionarPagos();
+		try {
+			Response<Object> response = providerRestTemplate.consumirServicio(gestionPagos.validaCancela(request, gestionPagoDto.getIdPago()).getDatos(), urlDominio + CONSULTA, authentication);
+			ArrayList datos1 = (ArrayList) response.getDatos();
+			if (datos1.get(0).toString().contains("total=0")) {
+				response.setDatos(false);
+			} else {
+				response.setDatos(AVISOCANCELACION);
+			}
+			return response;
+			
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), CONSULTA, authentication);
+			return null;
+		}
+		
 	}
 	
 	@Override
