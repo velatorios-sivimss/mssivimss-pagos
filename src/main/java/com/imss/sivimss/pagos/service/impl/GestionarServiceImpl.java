@@ -22,6 +22,7 @@ import com.imss.sivimss.pagos.model.request.BusquedaDto;
 import com.imss.sivimss.pagos.model.request.GestionPagoDto;
 import com.imss.sivimss.pagos.model.response.DetPagoResponse;
 import com.imss.sivimss.pagos.model.response.ModificaResponse;
+import com.imss.sivimss.pagos.model.response.CancelaResponse;
 import com.imss.sivimss.pagos.util.AppConstantes;
 import com.imss.sivimss.pagos.exception.BadRequestException;
 import com.imss.sivimss.pagos.util.MensajeResponseUtil;
@@ -44,6 +45,8 @@ public class GestionarServiceImpl implements GestionarService {
 	private static final String CONSULTA = "/consulta";
 	
 	private static final String ACTUALIZAR = "/actualizar";
+	
+	private static final String MULTIPLE = "/insertarMultiple";
 	
 	@Value("${endpoints.ms-reportes}")
 	private String urlReportes;
@@ -279,6 +282,32 @@ public class GestionarServiceImpl implements GestionarService {
 			return null;
 		}
 		
+	}
+	
+	@Override
+	public Response<Object> cancela(DatosRequest request, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+		
+		String datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
+
+		datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		CancelaResponse cancelaResponse = gson.fromJson(datosJson, CancelaResponse.class);
+		cancelaResponse.setIdUsuarioCancela(usuarioDto.getIdUsuario());
+		if (cancelaResponse.getIdFlujo() == null || cancelaResponse.getIdPagoDetalle() == null || cancelaResponse.getIdPago() == null) {
+			throw new BadRequestException(HttpStatus.BAD_REQUEST, "Informacion incompleta");
+		}
+		
+		GestionarPagos gestionPagos = new GestionarPagos(cancelaResponse.getIdFlujo(), cancelaResponse.getIdPago());
+		try {
+			return providerRestTemplate.consumirServicio(gestionPagos.cancelacion(cancelaResponse).getDatos(), urlDominio + MULTIPLE, authentication);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage());
+			logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), ACTUALIZAR, authentication);
+			return null;
+		}
+	
 	}
 	
 	@Override

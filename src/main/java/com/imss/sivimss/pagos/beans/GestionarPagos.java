@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.xml.bind.DatatypeConverter;
 
 import com.imss.sivimss.pagos.model.request.BusquedaDto;
+import com.imss.sivimss.pagos.model.response.CancelaResponse;
 import com.imss.sivimss.pagos.model.response.ModificaResponse;
 import com.imss.sivimss.pagos.util.AppConstantes;
 import com.imss.sivimss.pagos.util.DatosRequest;
@@ -274,6 +275,39 @@ public class GestionarPagos {
     	
     	String encoded = DatatypeConverter.printBase64Binary(query.toString().getBytes("UTF-8"));
         request.getDatos().put(AppConstantes.QUERY, encoded);
+		
+		return request;
+    }
+    
+    public DatosRequest cancelacion(CancelaResponse cancelaResponse) throws UnsupportedEncodingException {
+    	DatosRequest request = new DatosRequest();
+    	Map<String, Object> parametro = new HashMap<>();
+    	
+    	StringBuilder query = new StringBuilder("UPDATE SVT_PAGO_DETALLE SET CVE_ESTATUS = 0, ID_USUARIO_MODIFICA = " + cancelaResponse.getIdUsuarioCancela());
+    	query.append(", FEC_ACTUALIZACION = CURRENT_TIMESTAMP(), DES_MOTIVO_MODIFICA = '" + cancelaResponse.getMotivoCancela() + "' ");
+    	query.append(" WHERE ID_PAGO_DETALLE = " + cancelaResponse.getIdPagoDetalle() + ";$$");
+    	switch (this.idFlujo) {
+ 	      case 1:
+    	    query.append("UPDATE SVC_ORDEN_SERVICIO SET ID_ESTATUS_ORDEN_SERVICIO = 2, ");
+    	    query.append("ID_USUARIO_MODIFICA = " + cancelaResponse.getIdUsuarioCancela() + ", FEC_ACTUALIZACION = CURRENT_TIMESTAMP() ");
+    	    query.append("WHERE ID_ORDEN_SERVICIO = " + this.idPago + ";$$");
+    	    break;
+ 	      case 2:
+ 	    	query.append("UPDATE SVT_CONVENIO_PF SET ID_ESTATUS_CONVENIO = 1, ");
+ 	    	query.append("ID_USUARIO_MODIFICA = " + cancelaResponse.getIdUsuarioCancela() + ", FEC_ACTUALIZACION = CURRENT_TIMESTAMP() ");
+ 	    	query.append("WHERE ID_CONVENIO_PF = " + this.idPago + ";$$");
+ 	        break;
+ 	      default:
+ 	        query.append("UPDATE SVT_CONVENIO_PF SET ID_ESTATUS_CONVENIO = 1, ");
+ 	        query.append("ID_USUARIO_MODIFICA = " + cancelaResponse.getIdUsuarioCancela() + ", FEC_ACTUALIZACION = CURRENT_TIMESTAMP() ");
+ 	        query.append(" WHERE ID_CONVENIO_PF = ");
+ 	        query.append("(SELECT ID_CONVENIO_PF FROM SVT_RENOVACION_CONVENIO_PF WHERE ID_RENOVACION_CONVENIO_PF = " + this.idPago + ");$$");
+    	}
+    	
+    	String encoded = DatatypeConverter.printBase64Binary(query.toString().getBytes("UTF-8"));
+    	parametro.put(AppConstantes.QUERY, encoded);
+        parametro.put("separador", "$$");
+		request.setDatos(parametro);
 		
 		return request;
     }
