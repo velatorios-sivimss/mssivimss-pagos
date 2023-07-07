@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.xml.bind.DatatypeConverter;
 
 import com.imss.sivimss.pagos.model.request.BusquedaDto;
+import com.imss.sivimss.pagos.model.response.CancelaResponse;
 import com.imss.sivimss.pagos.model.response.ModificaResponse;
 import com.imss.sivimss.pagos.util.AppConstantes;
 import com.imss.sivimss.pagos.util.DatosRequest;
@@ -198,7 +199,7 @@ public class GestionarPagos {
     		   query.append("FROM SVC_ORDEN_SERVICIO OS ");
     		   query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO ");
     		   query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EODS ON EODS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO ");
-    		   query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EPAG ON EPAG.ID_ESTATUS_ORDEN_SERVICIO = PB.CVE_ESTATUS_PAGO \n");
+    		   query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO \n");
     		   query.append("WHERE OS.ID_ESTATUS_ORDEN_SERVICIO IN (0, 4) AND PB.CVE_ESTATUS_PAGO IN (4, 5) ");
     		   query.append("AND OS.ID_ORDEN_SERVICIO = " + this.idPago);
     		   query.append(" AND PB.ID_FLUJO_PAGOS = '1' ");
@@ -211,7 +212,7 @@ public class GestionarPagos {
     	       query.append("FROM SVT_CONVENIO_PF PF ");
     	       query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = PF.ID_CONVENIO_PF ");
     	       query.append("JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO ");
-    	       query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EPAG ON EPAG.ID_ESTATUS_ORDEN_SERVICIO = PB.CVE_ESTATUS_PAGO \n");
+    	       query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO \n");
     	       query.append("WHERE PF.ID_ESTATUS_CONVENIO IN ('2','3') AND PB.CVE_ESTATUS_PAGO IN (4, 5) ");
     	       query.append("AND PF.ID_CONVENIO_PF = " + this.idPago);
     	       query.append(" AND PB.ID_FLUJO_PAGOS = '2' ");
@@ -225,7 +226,7 @@ public class GestionarPagos {
     	       query.append("JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF = RPF.ID_CONVENIO_PF ");
     	       query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = PF.ID_CONVENIO_PF ");
     	       query.append("JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO ");
-    	       query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EPAG ON EPAG.ID_ESTATUS_ORDEN_SERVICIO = PB.CVE_ESTATUS_PAGO \n");
+    	       query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO \n");
     	       query.append("WHERE RPF.IND_ESTATUS = 1 AND PB.CVE_ESTATUS_PAGO IN (4, 5) ");
     	       query.append("AND RPF.ID_RENOVACION_CONVENIO_PF = " + this.idPago);
     	       query.append(" AND PB.ID_FLUJO_PAGOS = '3' ");
@@ -245,7 +246,7 @@ public class GestionarPagos {
     	query.append("PD.DES_BANCO AS desBanco, DATE_FORMAT(PD.FEC_VALE_AGF,'" + formatoFecha + "') AS fecValeAgf \n");
     	query.append("FROM SVT_PAGO_DETALLE PD ");
     	query.append("JOIN SVC_METODO_PAGO MP ON MP.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
-    	query.append("WHERE ID_PAGO_BITACORA = " + idPagoBitacora);
+    	query.append("WHERE PD.ID_PAGO_BITACORA = " + idPagoBitacora);
     	
     	String encoded = DatatypeConverter.printBase64Binary(query.toString().getBytes("UTF-8"));
         request.getDatos().put(AppConstantes.QUERY, encoded);
@@ -263,6 +264,51 @@ public class GestionarPagos {
 		String encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
 		parametro.put(AppConstantes.QUERY, encoded);
 		request.setDatos(parametro);
+		return request;
+    }
+    
+    public DatosRequest validaCancela(DatosRequest request, Integer idPagoBitacora) throws UnsupportedEncodingException {
+    	StringBuilder query = new StringBuilder("SELECT COUNT(PD.ID_PAGO_DETALLE) AS total ");
+    	query.append("FROM SVT_PAGO_DETALLE PD ");
+    	query.append("WHERE ID_PAGO_BITACORA = " + idPagoBitacora);
+    	query.append(" AND ID_METODO_PAGO > 2");
+    	
+    	String encoded = DatatypeConverter.printBase64Binary(query.toString().getBytes("UTF-8"));
+        request.getDatos().put(AppConstantes.QUERY, encoded);
+		
+		return request;
+    }
+    
+    public DatosRequest cancelacion(CancelaResponse cancelaResponse) throws UnsupportedEncodingException {
+    	DatosRequest request = new DatosRequest();
+    	Map<String, Object> parametro = new HashMap<>();
+    	
+    	StringBuilder query = new StringBuilder("UPDATE SVT_PAGO_DETALLE SET CVE_ESTATUS = 0, ID_USUARIO_MODIFICA = " + cancelaResponse.getIdUsuarioCancela());
+    	query.append(", FEC_ACTUALIZACION = CURRENT_TIMESTAMP(), DES_MOTIVO_MODIFICA = '" + cancelaResponse.getMotivoCancela() + "' ");
+    	query.append(" WHERE ID_PAGO_DETALLE = " + cancelaResponse.getIdPagoDetalle() + ";$$");
+    	switch (this.idFlujo) {
+ 	      case 1:
+    	    query.append("UPDATE SVC_ORDEN_SERVICIO SET ID_ESTATUS_ORDEN_SERVICIO = 2, ");
+    	    query.append("ID_USUARIO_MODIFICA = " + cancelaResponse.getIdUsuarioCancela() + ", FEC_ACTUALIZACION = CURRENT_TIMESTAMP() ");
+    	    query.append("WHERE ID_ORDEN_SERVICIO = " + this.idPago + ";$$");
+    	    break;
+ 	      case 2:
+ 	    	query.append("UPDATE SVT_CONVENIO_PF SET ID_ESTATUS_CONVENIO = 1, ");
+ 	    	query.append("ID_USUARIO_MODIFICA = " + cancelaResponse.getIdUsuarioCancela() + ", FEC_ACTUALIZACION = CURRENT_TIMESTAMP() ");
+ 	    	query.append("WHERE ID_CONVENIO_PF = " + this.idPago + ";$$");
+ 	        break;
+ 	      default:
+ 	        query.append("UPDATE SVT_CONVENIO_PF SET ID_ESTATUS_CONVENIO = 1, ");
+ 	        query.append("ID_USUARIO_MODIFICA = " + cancelaResponse.getIdUsuarioCancela() + ", FEC_ACTUALIZACION = CURRENT_TIMESTAMP() ");
+ 	        query.append(" WHERE ID_CONVENIO_PF = ");
+ 	        query.append("(SELECT ID_CONVENIO_PF FROM SVT_RENOVACION_CONVENIO_PF WHERE ID_RENOVACION_CONVENIO_PF = " + this.idPago + ");$$");
+    	}
+    	
+    	String encoded = DatatypeConverter.printBase64Binary(query.toString().getBytes("UTF-8"));
+    	parametro.put(AppConstantes.QUERY, encoded);
+        parametro.put("separador", "$$");
+		request.setDatos(parametro);
+		
 		return request;
     }
     
@@ -319,7 +365,7 @@ public class GestionarPagos {
 		
 		return envioDatos;
 	}
-		
+    
     private StringBuilder consultaOds() {
     	StringBuilder query = new StringBuilder("SELECT OS.ID_ORDEN_SERVICIO AS id, DATE_FORMAT(OS.FEC_ALTA,'" + formatoFecLocal + "') AS fecha, OS.CVE_FOLIO AS folio, ");
     	query.append("PB.NOM_CONTRATANTE AS nomContratante, 1 AS idFlujo, 'Pago de Orden de Servicio' AS desFlujo, ");
@@ -335,7 +381,7 @@ public class GestionarPagos {
     	query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO ");
     	query.append("JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA ");
     	query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EODS ON EODS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO ");
-    	query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EPAG ON EPAG.ID_ESTATUS_ORDEN_SERVICIO = PB.CVE_ESTATUS_PAGO ");
+    	query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO ");
     	query.append("JOIN SVC_METODO_PAGO MET ON MET.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
     	query.append("WHERE OS.ID_ESTATUS_ORDEN_SERVICIO IN (0, 2, 4) ");
     	query.append("AND PB.CVE_ESTATUS_PAGO IN (2, 4, 5) ");
@@ -362,7 +408,7 @@ public class GestionarPagos {
     	query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = PF.ID_CONVENIO_PF ");
     	query.append("JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA ");
     	query.append("JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO ");
-    	query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EPAG ON EPAG.ID_ESTATUS_ORDEN_SERVICIO = PB.CVE_ESTATUS_PAGO ");
+    	query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO ");
     	query.append("JOIN SVC_METODO_PAGO MET ON MET.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
     	query.append("WHERE PB.CVE_ESTATUS_PAGO IN (0, 2, 3, 4, 5) ");
     	query.append("AND PB.ID_FLUJO_PAGOS = '2' \n");
@@ -388,7 +434,7 @@ public class GestionarPagos {
     	query.append("JOIN SVT_PAGO_BITACORA PB ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO ");
     	query.append("JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA ");
     	query.append("JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO ");
-    	query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EPAG ON EPAG.ID_ESTATUS_ORDEN_SERVICIO = PB.CVE_ESTATUS_PAGO ");
+    	query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO ");
     	query.append("JOIN SVC_METODO_PAGO MET ON MET.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
     	query.append("WHERE RPF.IND_ESTATUS = 1 ");
     	query.append("AND PB.CVE_ESTATUS_PAGO IN (2, 3, 4, 5) ");

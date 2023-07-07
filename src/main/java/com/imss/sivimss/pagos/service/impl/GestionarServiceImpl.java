@@ -22,6 +22,7 @@ import com.imss.sivimss.pagos.model.request.BusquedaDto;
 import com.imss.sivimss.pagos.model.request.GestionPagoDto;
 import com.imss.sivimss.pagos.model.response.DetPagoResponse;
 import com.imss.sivimss.pagos.model.response.ModificaResponse;
+import com.imss.sivimss.pagos.model.response.CancelaResponse;
 import com.imss.sivimss.pagos.util.AppConstantes;
 import com.imss.sivimss.pagos.exception.BadRequestException;
 import com.imss.sivimss.pagos.util.MensajeResponseUtil;
@@ -45,6 +46,8 @@ public class GestionarServiceImpl implements GestionarService {
 	
 	private static final String ACTUALIZAR = "/actualizar";
 	
+	private static final String MULTIPLE = "/insertarMultiple";
+	
 	@Value("${endpoints.ms-reportes}")
 	private String urlReportes;
 	
@@ -52,6 +55,10 @@ public class GestionarServiceImpl implements GestionarService {
 	private String formatoFecha;
 	
 	private static final String INFONOENCONTRADA = "45";
+	
+	private static final String AVISOCANCELACION = "123";
+	
+	private static final String AVISOMODIFICACION = "124";
 	
 	private static final String ERROR_DESCARGA = "64";
 	
@@ -191,21 +198,24 @@ public class GestionarServiceImpl implements GestionarService {
 		
 		try {
 		    response = providerRestTemplate.consumirServicio(gestionPagos.detalleGeneral(request, formatoFecha).getDatos(), urlDominio + CONSULTA, authentication);
-		    listaDatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
-		    detalle.setFecha(listaDatos.get(0).get("fecha").toString());
-		    detalle.setFolio(listaDatos.get(0).get("folio").toString());
-		    detalle.setNomContratante(listaDatos.get(0).get("nomContratante").toString());
-		    detalle.setIdFlujo((Integer) listaDatos.get(0).get("idFlujo"));
-		    detalle.setDesFlujo(listaDatos.get(0).get("desFlujo").toString());
-		    detalle.setFecPago(listaDatos.get(0).get("fecPago").toString());
-		    detalle.setDesEstatus(listaDatos.get(0).get("desEstatus").toString());
-		    detalle.setDesEstatusPago(listaDatos.get(0).get("desEstatusPago").toString());
-		    detalle.setIdPagoBitacora((Integer) listaDatos.get(0).get("idPagoBitacora"));
+		    ArrayList datos1 = (ArrayList) response.getDatos();
+		    if (!datos1.isEmpty()) {
+			    listaDatos = Arrays.asList(modelMapper.map(datos1, Map[].class));
+			    detalle.setFecha(listaDatos.get(0).get("fecha").toString());
+			    detalle.setFolio(listaDatos.get(0).get("folio").toString());
+			    detalle.setNomContratante(listaDatos.get(0).get("nomContratante").toString());
+			    detalle.setIdFlujo((Integer) listaDatos.get(0).get("idFlujo"));
+			    detalle.setDesFlujo(listaDatos.get(0).get("desFlujo").toString());
+			    detalle.setFecPago(listaDatos.get(0).get("fecPago").toString());
+			    detalle.setDesEstatus(listaDatos.get(0).get("desEstatus").toString());
+			    detalle.setDesEstatusPago(listaDatos.get(0).get("desEstatusPago").toString());
+			    detalle.setIdPagoBitacora((Integer) listaDatos.get(0).get("idPagoBitacora"));
 		    
-		    response = providerRestTemplate.consumirServicio(gestionPagos.detallePagos(request, formatoFecha, detalle.getIdPagoBitacora()).getDatos(), urlDominio + CONSULTA, authentication);
-		    listaDatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
-		    detalle.setMetodosPago(listaDatos);
-		    response.setDatos(detalle);
+			    response = providerRestTemplate.consumirServicio(gestionPagos.detallePagos(request, formatoFecha, detalle.getIdPagoBitacora()).getDatos(), urlDominio + CONSULTA, authentication);
+			    listaDatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
+			    detalle.setMetodosPago(listaDatos);
+			    response.setDatos(detalle);
+		    }
 		
 		} catch (Exception e) {
 			    log.error(e.getMessage());
@@ -232,13 +242,72 @@ public class GestionarServiceImpl implements GestionarService {
 		}
 		GestionarPagos gestionPagos = new GestionarPagos();
 		try {
-			return providerRestTemplate.consumirServicio(gestionPagos.modifica(modificaResponse).getDatos(), urlDominio + ACTUALIZAR, authentication);
+			Response<Object> response = providerRestTemplate.consumirServicio(gestionPagos.modifica(modificaResponse).getDatos(), urlDominio + ACTUALIZAR, authentication);
+			if ((Boolean) response.getDatos()) {
+				response.setDatos(AVISOMODIFICACION);
+			}
+			return response;
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), MODIFICACION, authentication);
 			return null;
 		}
 				
+	}
+	
+	@Override
+	public Response<Object> valida(DatosRequest request, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+
+		String datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		GestionPagoDto gestionPagoDto = gson.fromJson(datosJson, GestionPagoDto.class);
+		if (gestionPagoDto.getIdPago() == null) {
+			throw new BadRequestException(HttpStatus.BAD_REQUEST, "Informacion incompleta");
+		}
+		
+		GestionarPagos gestionPagos = new GestionarPagos();
+		try {
+			Response<Object> response = providerRestTemplate.consumirServicio(gestionPagos.validaCancela(request, gestionPagoDto.getIdPago()).getDatos(), urlDominio + CONSULTA, authentication);
+			ArrayList datos1 = (ArrayList) response.getDatos();
+			if (datos1.get(0).toString().contains("total=0")) {
+				response.setDatos(false);
+			} else {
+				response.setDatos(AVISOCANCELACION);
+			}
+			return response;
+			
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), CONSULTA, authentication);
+			return null;
+		}
+		
+	}
+	
+	@Override
+	public Response<Object> cancela(DatosRequest request, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+		
+		String datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
+
+		datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		CancelaResponse cancelaResponse = gson.fromJson(datosJson, CancelaResponse.class);
+		cancelaResponse.setIdUsuarioCancela(usuarioDto.getIdUsuario());
+		if (cancelaResponse.getIdFlujo() == null || cancelaResponse.getIdPagoDetalle() == null || cancelaResponse.getIdPago() == null) {
+			throw new BadRequestException(HttpStatus.BAD_REQUEST, "Informacion incompleta");
+		}
+		
+		GestionarPagos gestionPagos = new GestionarPagos(cancelaResponse.getIdFlujo(), cancelaResponse.getIdPago());
+		try {
+			return providerRestTemplate.consumirServicio(gestionPagos.cancelacion(cancelaResponse).getDatos(), urlDominio + MULTIPLE, authentication);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage());
+			logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), ACTUALIZAR, authentication);
+			return null;
+		}
+	
 	}
 	
 	@Override

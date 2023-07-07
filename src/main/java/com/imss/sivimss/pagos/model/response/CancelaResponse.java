@@ -10,10 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ModificaResponse {
+public class CancelaResponse {
 	
+	private Integer idFlujo;
+	private Integer idPago;
 	private Integer idPagoDetalle;
-	private Integer idUsuarioModifica;
-	private String motivoModifica;
+	private Integer idUsuarioCancela;
+	private String motivoCancela;
 
 }

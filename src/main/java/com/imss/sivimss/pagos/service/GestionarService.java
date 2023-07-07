@@ -23,6 +23,10 @@ public interface GestionarService {
 	
 	Response<Object> modifica(DatosRequest request, Authentication authentication) throws IOException;
 	
+	Response<Object> valida(DatosRequest request, Authentication authentication) throws IOException;
+	
+	Response<Object> cancela(DatosRequest request, Authentication authentication) throws IOException;
+	
 	Response<Object> descargarDocumento(DatosRequest request, Authentication authentication) throws IOException;
 	
 }

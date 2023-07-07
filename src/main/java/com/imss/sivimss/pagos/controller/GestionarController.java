@@ -116,6 +116,28 @@ public class GestionarController {
 	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
 	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
 	@TimeLimiter(name = "msflujo")
+	@PostMapping("/valida")
+	public CompletableFuture<Object> valida(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		
+		Response<?> response = gestionarService.valida(request, authentication);
+		return CompletableFuture
+				.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	@PostMapping("/cancela")
+	public CompletableFuture<Object> cancela(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		
+		Response<?> response = gestionarService.cancela(request, authentication);
+		return CompletableFuture
+				.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
 	@PostMapping("/generar-docto")
 	public CompletableFuture<Object> generarDocumento(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
 		
