@@ -324,10 +324,10 @@ public class PagosUtil {
 		return q.obtenerQueryActualizar();
 	}
 	
-	public String actPB(String idPb, Integer idUsuario) {
+	public String actPB(String idPb, Integer idUsuario, String idEstatus) {
 		
 		QueryHelper q = new QueryHelper("UPDATE SVT_PAGO_BITACORA");
-		q.agregarParametroValues("CVE_ESTATUS_PAGO", "4");
+		q.agregarParametroValues("CVE_ESTATUS_PAGO", idEstatus);
 		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
 		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
 		q.addWhere("ID_PAGO_BITACORA = " + idPb);
@@ -354,7 +354,7 @@ public class PagosUtil {
 		query.append(idPagoBitacora);
 		query.append(" AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado\r\n"
 				+ "FROM SVT_PAGO_BITACORA PB\r\n"
-				+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOS ON EOS.ID_ESTATUS_ORDEN_SERVICIO = PB.CVE_ESTATUS_PAGO\r\n"
+				+ "INNER JOIN SVC_ESTATUS_PAGO EOS ON EOS.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
 				+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
 				+ "WHERE\r\n"
 				+ "PB.ID_PAGO_BITACORA = ");
@@ -380,7 +380,7 @@ public class PagosUtil {
 				+ "FROM \r\n"
 				+ "SVT_PAGO_DETALLE PD\r\n"
 				+ "INNER JOIN SVC_METODO_PAGO MP ON MP.ID_METODO_PAGO = PD.ID_METODO_PAGO\r\n"
-				+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOS ON EOS.ID_ESTATUS_ORDEN_SERVICIO = PD.CVE_ESTATUS\r\n"
+				+ "INNER JOIN SVC_ESTATUS_PAGO EOS ON EOS.ID_ESTATUS_PAGO = PD.CVE_ESTATUS\r\n"
 				+ "WHERE ID_PAGO_BITACORA = ");
 		query.append(idPagoBitacora);
 		query.append(" AND PD.CVE_ESTATUS = 4");
