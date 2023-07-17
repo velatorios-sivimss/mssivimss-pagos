@@ -25,6 +25,37 @@ public class PagosUtil {
 			+ "FROM SVT_PAGO_BITACORA PB\r\n"
 			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n";
 	
+	private static String CONSULTA_ODS = "SELECT \r\n"
+			+ "T.*,\r\n"
+			+ "(T.total - T.totalPagado) AS diferenciasTotales\r\n"
+			+ "FROM \r\n"
+			+ "(SELECT\r\n"
+			+ "PB.ID_PAGO_BITACORA AS idPagoBitacora,\r\n"
+			+ "PB.ID_FLUJO_PAGOS AS idFlujoPago,\r\n"
+			+ "PB.ID_REGISTRO AS idRegistro,\r\n"
+			+ "PB.FEC_ODS AS fechaPago,\r\n"
+			+ "PB.CVE_FOLIO AS folio,\r\n"
+			+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
+			+ "CAST(PB.DESC_VALOR AS double) AS total,\r\n"
+			+ "IFNULL( (SELECT SUM(PD.IMP_IMPORTE)\r\n"
+			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
+			+ "WHERE \r\n"
+			+ "PD.ID_PAGO_BITACORA = idPagoBitacora AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado,\r\n"
+			+ "(\r\n"
+			+ "SELECT COUNT(PAGARE.ID_PAGARE)\r\n"
+			+ "FROM SVT_PAGARE PAGARE\r\n"
+			+ "WHERE PAGARE.ID_ODS = PB.ID_REGISTRO\r\n"
+			+ ") AS pagares,\r\n"
+			+ "EP.DES_ESTATUS AS estatusPago\r\n"
+			+ "FROM SVT_PAGO_BITACORA PB\r\n"
+			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
+			+ "INNER JOIN SVC_ORDEN_SERVICIO OS ON OS.ID_ORDEN_SERVICIO = PB.ID_REGISTRO\r\n"
+			+ "INNER JOIN SVC_ESTATUS_PAGO EP ON EP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
+			+ "WHERE\r\n"
+			+ "PB.ID_FLUJO_PAGOS = '1'\r\n"
+			+ "AND OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2)\r\n"
+			+ ") T"; 
+	
 	public String consultaTabla(FiltroRequest filtros) {
 		
 		StringBuilder query = new StringBuilder("");
@@ -116,7 +147,7 @@ public class PagosUtil {
 				+ "0 AS pagares \r\n"
 				+ "FROM SVT_PAGO_BITACORA PB \r\n"
 				+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS \r\n"
-				+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOSP ON EOSP.ID_ESTATUS_ORDEN_SERVICIO = PB.CVE_ESTATUS_PAGO\r\n"
+				+ "INNER JOIN SVC_ESTATUS_PAGO EOSP ON EOSP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
 				+ "INNER JOIN SVT_RENOVACION_CONVENIO_PF RPF ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO\r\n"
 				+ "WHERE \r\n"
 				+ "RPF.IND_ESTATUS = '1'\r\n"
@@ -203,11 +234,7 @@ public class PagosUtil {
 		String query = CONSULTA_INI;
 		
 		switch(idFlujo) {
-		case 1: query = query + "INNER JOIN SVC_ORDEN_SERVICIO OS ON OS.ID_ORDEN_SERVICIO = PB.ID_REGISTRO\r\n"
-				+ "WHERE\r\n"
-				+ "PB.ID_FLUJO_PAGOS = '1'\r\n"
-				+ "AND OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2)\r\n"
-				+ ") T";
+		case 1: query = CONSULTA_ODS;
 		break;
 		case 2: query = query + "INNER JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF =PB.ID_REGISTRO\r\n"
 				+ "INNER JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO\r\n"
