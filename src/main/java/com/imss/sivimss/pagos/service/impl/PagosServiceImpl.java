@@ -172,7 +172,7 @@ public class PagosServiceImpl implements PagosService {
 				
 			}
 			
-			query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "4" );
+			query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "4", "0" );
 			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 					this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
 			encoded = DatatypeConverter.printBase64Binary(query.getBytes());
@@ -180,7 +180,7 @@ public class PagosServiceImpl implements PagosService {
 			
 		}else {
 			
-			query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "8" );
+			query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "8", "1" );
 			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 					this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
 			encoded = DatatypeConverter.printBase64Binary(query.getBytes());

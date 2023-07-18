@@ -41,11 +41,7 @@ public class PagosUtil {
 			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
 			+ "WHERE \r\n"
 			+ "PD.ID_PAGO_BITACORA = idPagoBitacora AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado,\r\n"
-			+ "(\r\n"
-			+ "SELECT COUNT(PAGARE.ID_PAGARE)\r\n"
-			+ "FROM SVT_PAGARE PAGARE\r\n"
-			+ "WHERE PAGARE.ID_ODS = PB.ID_REGISTRO\r\n"
-			+ ") AS pagares,\r\n"
+			+ "PB.GEN_PAGARE AS generarPagare,\r\n"
 			+ "EP.DES_ESTATUS AS estatusPago\r\n"
 			+ "FROM SVT_PAGO_BITACORA PB\r\n"
 			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
@@ -81,11 +77,7 @@ public class PagosUtil {
 				+ "PB.DESC_VALOR AS total, \r\n"
 				+ "EOS.DES_ESTATUS AS estatus, \r\n"
 				+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
-				+ "(\r\n"
-				+ "SELECT COUNT(PAGARE.ID_PAGARE)\r\n"
-				+ "FROM SVT_PAGARE PAGARE\r\n"
-				+ "WHERE PAGARE.ID_ODS = PB.ID_REGISTRO\r\n"
-				+ ") AS pagares\r\n"
+				+ "PB.GEN_PAGARE AS generarPagare\r\n"
 				+ "FROM SVT_PAGO_BITACORA PB \r\n"
 				+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS \r\n"
 				+ "INNER JOIN SVC_ORDEN_SERVICIO OS ON OS.ID_ORDEN_SERVICIO = PB.ID_REGISTRO \r\n"
@@ -114,7 +106,7 @@ public class PagosUtil {
 				+ "PB.DESC_VALOR AS total, \r\n"
 				+ "ECPF.DES_ESTATUS AS estatus, \r\n"
 				+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
-				+ "0 AS pagares\r\n"
+				+ "0 AS generarPagare\r\n"
 				+ "FROM SVT_PAGO_BITACORA PB \r\n"
 				+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
 				+ "INNER JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF =PB.ID_REGISTRO\r\n"
@@ -144,7 +136,7 @@ public class PagosUtil {
 				+ "PB.DESC_VALOR AS total, \r\n"
 				+ "'Vigente' AS estatus, \r\n"
 				+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
-				+ "0 AS pagares \r\n"
+				+ "0 AS generarPagare \r\n"
 				+ "FROM SVT_PAGO_BITACORA PB \r\n"
 				+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS \r\n"
 				+ "INNER JOIN SVC_ESTATUS_PAGO EOSP ON EOSP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
@@ -358,12 +350,13 @@ public class PagosUtil {
 		return q.obtenerQueryActualizar();
 	}
 	
-	public String actPB(String idPb, Integer idUsuario, String idEstatus) {
+	public String actPB(String idPb, Integer idUsuario, String idEstatus, String generarPagare) {
 		
 		QueryHelper q = new QueryHelper("UPDATE SVT_PAGO_BITACORA");
 		q.agregarParametroValues("CVE_ESTATUS_PAGO", idEstatus);
 		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
 		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
+		q.agregarParametroValues("GEN_PAGARE", generarPagare);
 		q.addWhere("ID_PAGO_BITACORA = " + idPb);
 	
 		return q.obtenerQueryActualizar();
