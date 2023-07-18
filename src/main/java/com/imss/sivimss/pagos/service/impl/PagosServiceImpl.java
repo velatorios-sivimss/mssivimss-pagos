@@ -179,8 +179,12 @@ public class PagosServiceImpl implements PagosService {
 			querys.add( encoded );
 			
 		}else {
+			if( crearRequest.getIdFlujoPago().equals(1) ) {
+				query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "8", "1" );
+			}else {
+				query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "8", "0" );
+			}
 			
-			query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "8", "1" );
 			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 					this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
 			encoded = DatatypeConverter.printBase64Binary(query.getBytes());
