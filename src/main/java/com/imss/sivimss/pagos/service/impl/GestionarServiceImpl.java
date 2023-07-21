@@ -220,7 +220,6 @@ public class GestionarServiceImpl implements GestionarService {
 		    }
 		
 		} catch (Exception e) {
-			    e.printStackTrace();
 			    log.error(e.getMessage());
 		        logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), CONSULTA, authentication);
 				return null;
