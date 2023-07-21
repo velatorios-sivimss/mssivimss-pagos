@@ -193,9 +193,10 @@ public class GestionarPagos {
     	switch (this.idFlujo) {
     	   case 1:
     		   query.append("SELECT OS.ID_ORDEN_SERVICIO AS id, DATE_FORMAT(OS.FEC_ALTA,'" + formatoFecha + "') AS fecha, OS.CVE_FOLIO AS folio, ");
-    		   query.append("PB.NOM_CONTRATANTE AS nomContratante, 1 AS idFlujo, 'Pago de Orden de Servicio' AS desFlujo, DATE_FORMAT(PB.FEC_ALTA,'" + formatoFecha + "') AS fecPago, ");
+    		   query.append("PB.NOM_CONTRATANTE AS nomContratante, 1 AS idFlujo, 'Pago de Orden de Servicio' AS desFlujo, DATE_FORMAT(PB.FEC_ALTA,'" + formatoFecha + "') AS fecPago, \n");
     		   query.append("OS.ID_ESTATUS_ORDEN_SERVICIO AS idEstatus, EODS.DES_ESTATUS desEstatus, PB.CVE_ESTATUS_PAGO AS idEstatusPago, ");
-    		   query.append("EPAG.DES_ESTATUS desEstatusPago, PB.ID_PAGO_BITACORA AS idPagoBitacora \n");
+    		   query.append("EPAG.DES_ESTATUS desEstatusPago, PB.ID_PAGO_BITACORA AS idPagoBitacora, ");
+    		   query.append("PB.DESC_VALOR AS montoTotal \n");
     		   query.append("FROM SVC_ORDEN_SERVICIO OS ");
     		   query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO ");
     		   query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EODS ON EODS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO ");
@@ -206,9 +207,10 @@ public class GestionarPagos {
     		   break;
     	   case 2:
     		   query.append("SELECT PF.ID_CONVENIO_PF AS id, DATE_FORMAT(PF.FEC_ALTA,'" + formatoFecha + "') AS fecha, PF.DES_FOLIO AS folio, ");
-    	       query.append("PB.NOM_CONTRATANTE AS nomContratante, 2 AS idFlujo, 'Pago de Prevision Funeraria' AS desFlujo, DATE_FORMAT(PB.FEC_ALTA,'" + formatoFecha + "') AS fecPago, ");
+    	       query.append("PB.NOM_CONTRATANTE AS nomContratante, 2 AS idFlujo, 'Pago de Prevision Funeraria' AS desFlujo, DATE_FORMAT(PB.FEC_ALTA,'" + formatoFecha + "') AS fecPago, \n");
     	       query.append("PF.ID_ESTATUS_CONVENIO AS idEstatus, ECPF.DES_ESTATUS desEstatus, PB.CVE_ESTATUS_PAGO AS idEstatusPago, ");
-    	       query.append("EPAG.DES_ESTATUS desEstatusPago, PB.ID_PAGO_BITACORA AS idPagoBitacora \n");
+    	       query.append("EPAG.DES_ESTATUS desEstatusPago, PB.ID_PAGO_BITACORA AS idPagoBitacora, ");
+    	       query.append("PB.DESC_VALOR AS montoTotal \n");
     	       query.append("FROM SVT_CONVENIO_PF PF ");
     	       query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = PF.ID_CONVENIO_PF ");
     	       query.append("JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO ");
@@ -219,9 +221,10 @@ public class GestionarPagos {
     	       break;
     	   default:
     		   query.append("SELECT RPF.ID_RENOVACION_CONVENIO_PF AS id, DATE_FORMAT(RPF.FEC_ALTA,'" + formatoFecha + "') AS fecha, RPF.DES_FOLIO_ADENDA AS folio, ");
-    	       query.append("PB.NOM_CONTRATANTE AS nomContratante, 3 AS idFlujo,'Pago de Renovacion Previsión Funeraria' AS desFlujo, DATE_FORMAT(PB.FEC_ALTA,'" + formatoFecha + "') AS fecPago, ");
+    	       query.append("PB.NOM_CONTRATANTE AS nomContratante, 3 AS idFlujo,'Pago de Renovacion Previsión Funeraria' AS desFlujo, DATE_FORMAT(PB.FEC_ALTA,'" + formatoFecha + "') AS fecPago, \n");
     	       query.append("PF.ID_ESTATUS_CONVENIO AS idEstatus, ECPF.DES_ESTATUS desEstatus, PB.CVE_ESTATUS_PAGO AS idEstatusPago, ");
-    	       query.append("EPAG.DES_ESTATUS desEstatusPago, PB.ID_PAGO_BITACORA AS idPagoBitacora \n");
+    	       query.append("EPAG.DES_ESTATUS desEstatusPago, PB.ID_PAGO_BITACORA AS idPagoBitacora, ");
+    	       query.append("PB.DESC_VALOR AS montoTotal \n");
     	       query.append("FROM SVT_RENOVACION_CONVENIO_PF RPF ");
     	       query.append("JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF = RPF.ID_CONVENIO_PF ");
     	       query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = PF.ID_CONVENIO_PF ");
