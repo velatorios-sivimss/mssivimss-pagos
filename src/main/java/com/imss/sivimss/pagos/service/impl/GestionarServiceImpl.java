@@ -302,7 +302,6 @@ public class GestionarServiceImpl implements GestionarService {
 		try {
 			return providerRestTemplate.consumirServicio(gestionPagos.cancelacion(cancelaResponse).getDatos(), urlDominio + MULTIPLE, authentication);
 		} catch (Exception e) {
-			e.printStackTrace();
 			log.error(e.getMessage());
 			logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), ACTUALIZAR, authentication);
 			return null;
