@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DetPagoResponse {
 	
+	private Integer id;
 	private String fecha;
 	private String folio;
 	private String nomContratante;
@@ -24,6 +25,7 @@ public class DetPagoResponse {
 	private String desEstatus;
 	private String desEstatusPago;
 	private Integer idPagoBitacora;
+	private Double montoTotal; 
 	private List<Map<String, Object>> metodosPago;
 
 }
