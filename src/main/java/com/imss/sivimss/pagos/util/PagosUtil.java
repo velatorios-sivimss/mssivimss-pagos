@@ -1,5 +1,8 @@
 package com.imss.sivimss.pagos.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.imss.sivimss.pagos.model.request.CrearRequest;
 import com.imss.sivimss.pagos.model.request.FiltroRequest;
 
@@ -52,153 +55,105 @@ public class PagosUtil {
 			+ "AND OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2)\r\n"
 			+ ") T"; 
 	
+	private static String CONSULTA_TABLA = "SELECT\r\n"
+			+ "T.*\r\n"
+			+ "FROM\r\n"
+			+ "(\r\n"
+			+ "( SELECT \r\n"
+			+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
+			+ "PB.ID_VELATORIO AS idVelatorio, \r\n"
+			+ "PB.FEC_ODS AS fecha, \r\n"
+			+ "PB.CVE_FOLIO AS folio, \r\n"
+			+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
+			+ "PB.ID_FLUJO_PAGOS AS idFlujoPagos, \r\n"
+			+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
+			+ "(SELECT \r\n"
+			+ "GROUP_CONCAT( MP.DESC_METODO_PAGO SEPARATOR ', ' )\r\n"
+			+ "FROM SVC_METODO_PAGO MP\r\n"
+			+ "INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO\r\n"
+			+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+			+ "AND PD.CVE_ESTATUS = '4' \r\n"
+			+ " ) AS metodoPago,\r\n"
+			+ "PB.DESC_VALOR AS total, \r\n"
+			+ "EOS.DES_ESTATUS AS estatus, \r\n"
+			+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
+			+ "PB.GEN_PAGARE AS generarPagare\r\n"
+			+ "FROM SVT_PAGO_BITACORA PB \r\n"
+			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS \r\n"
+			+ "INNER JOIN SVC_ORDEN_SERVICIO OS ON OS.ID_ORDEN_SERVICIO = PB.ID_REGISTRO \r\n"
+			+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOS ON EOS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO \r\n"
+			+ "INNER JOIN SVC_ESTATUS_PAGO EOSP ON EOSP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
+			+ "WHERE \r\n"
+			+ "OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2,4)\r\n"
+			+ "AND PB.ID_FLUJO_PAGOS = '1' )\r\n"
+			+ "UNION ALL\r\n"
+			+ "(\r\n"
+			+ "SELECT \r\n"
+			+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
+			+ "PB.ID_VELATORIO AS idVelatorio, \r\n"
+			+ "PB.FEC_ODS AS fecha, \r\n"
+			+ "PB.CVE_FOLIO AS folio, \r\n"
+			+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
+			+ "PB.ID_FLUJO_PAGOS AS idFlujoPagos,\r\n"
+			+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
+			+ "(SELECT \r\n"
+			+ "GROUP_CONCAT( MP.DESC_METODO_PAGO SEPARATOR ', ' )\r\n"
+			+ "FROM SVC_METODO_PAGO MP\r\n"
+			+ "INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO\r\n"
+			+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+			+ "AND PD.CVE_ESTATUS = '4' \r\n"
+			+ " ) AS metodoPago,\r\n"
+			+ "PB.DESC_VALOR AS total, \r\n"
+			+ "ECPF.DES_ESTATUS AS estatus, \r\n"
+			+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
+			+ "0 AS generarPagare\r\n"
+			+ "FROM SVT_PAGO_BITACORA PB \r\n"
+			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
+			+ "INNER JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF =PB.ID_REGISTRO\r\n"
+			+ "INNER JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO\r\n"
+			+ "INNER JOIN SVC_ESTATUS_PAGO EOSP ON EOSP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
+			+ "WHERE\r\n"
+			+ "PF.ID_ESTATUS_CONVENIO = '1'\r\n"
+			+ "AND PB.ID_FLUJO_PAGOS = '2'\r\n"
+			+ ")\r\n"
+			+ "UNION ALL\r\n"
+			+ "(\r\n"
+			+ "SELECT \r\n"
+			+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
+			+ "PB.ID_VELATORIO AS idVelatorio, \r\n"
+			+ "PB.FEC_ODS AS fecha, \r\n"
+			+ "PB.CVE_FOLIO AS folio, \r\n"
+			+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
+			+ "PB.ID_FLUJO_PAGOS AS idFlujoPagos,\r\n"
+			+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
+			+ "(SELECT \r\n"
+			+ "GROUP_CONCAT( MP.DESC_METODO_PAGO SEPARATOR ', ' )\r\n"
+			+ "FROM SVC_METODO_PAGO MP\r\n"
+			+ "INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO\r\n"
+			+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+			+ "AND PD.CVE_ESTATUS = '4' \r\n"
+			+ " ) AS metodoPago,\r\n"
+			+ "PB.DESC_VALOR AS total, \r\n"
+			+ "'Vigente' AS estatus, \r\n"
+			+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
+			+ "0 AS generarPagare \r\n"
+			+ "FROM SVT_PAGO_BITACORA PB \r\n"
+			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS \r\n"
+			+ "INNER JOIN SVC_ESTATUS_PAGO EOSP ON EOSP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
+			+ "INNER JOIN SVT_RENOVACION_CONVENIO_PF RPF ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO\r\n"
+			+ "WHERE \r\n"
+			+ "RPF.IND_ESTATUS = '1'\r\n"
+			+ "AND PB.ID_FLUJO_PAGOS = '3'\r\n"
+			+ ")\r\n"
+			+ ")\r\n"
+			+ "T";
+	
 	public String consultaTabla(FiltroRequest filtros) {
 		
-		StringBuilder query = new StringBuilder("");
-		query.append( "SELECT\r\n"
-				+ "T.*\r\n"
-				+ "FROM\r\n"
-				+ "(\r\n"
-				+ "( SELECT \r\n"
-				+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
-				+ "PB.ID_VELATORIO AS idVelatorio, \r\n"
-				+ "PB.FEC_ODS AS fecha, \r\n"
-				+ "PB.CVE_FOLIO AS folio, \r\n"
-				+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
-				+ "PB.ID_FLUJO_PAGOS AS idFlujoPagos, \r\n"
-				+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
-				+ "(SELECT \r\n"
-				+ "GROUP_CONCAT( MP.DESC_METODO_PAGO SEPARATOR ', ' )\r\n"
-				+ "FROM SVC_METODO_PAGO MP\r\n"
-				+ "INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO\r\n"
-				+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
-				+ "AND PD.CVE_ESTATUS = '4' \r\n"
-				+ " ) AS metodoPago,\r\n"
-				+ "PB.DESC_VALOR AS total, \r\n"
-				+ "EOS.DES_ESTATUS AS estatus, \r\n"
-				+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
-				+ "PB.GEN_PAGARE AS generarPagare\r\n"
-				+ "FROM SVT_PAGO_BITACORA PB \r\n"
-				+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS \r\n"
-				+ "INNER JOIN SVC_ORDEN_SERVICIO OS ON OS.ID_ORDEN_SERVICIO = PB.ID_REGISTRO \r\n"
-				+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOS ON EOS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO \r\n"
-				+ "INNER JOIN SVC_ESTATUS_PAGO EOSP ON EOSP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
-				+ "WHERE \r\n"
-				+ "OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2,4)\r\n"
-				+ "AND PB.ID_FLUJO_PAGOS = '1' )\r\n"
-				+ "UNION ALL\r\n"
-				+ "(\r\n"
-				+ "SELECT \r\n"
-				+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
-				+ "PB.ID_VELATORIO AS idVelatorio, \r\n"
-				+ "PB.FEC_ODS AS fecha, \r\n"
-				+ "PB.CVE_FOLIO AS folio, \r\n"
-				+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
-				+ "PB.ID_FLUJO_PAGOS AS idFlujoPagos,\r\n"
-				+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
-				+ "(SELECT \r\n"
-				+ "GROUP_CONCAT( MP.DESC_METODO_PAGO SEPARATOR ', ' )\r\n"
-				+ "FROM SVC_METODO_PAGO MP\r\n"
-				+ "INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO\r\n"
-				+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
-				+ "AND PD.CVE_ESTATUS = '4' \r\n"
-				+ " ) AS metodoPago,\r\n"
-				+ "PB.DESC_VALOR AS total, \r\n"
-				+ "ECPF.DES_ESTATUS AS estatus, \r\n"
-				+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
-				+ "0 AS generarPagare\r\n"
-				+ "FROM SVT_PAGO_BITACORA PB \r\n"
-				+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
-				+ "INNER JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF =PB.ID_REGISTRO\r\n"
-				+ "INNER JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO\r\n"
-				+ "INNER JOIN SVC_ESTATUS_PAGO EOSP ON EOSP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
-				+ "WHERE\r\n"
-				+ "PF.ID_ESTATUS_CONVENIO = '1'\r\n"
-				+ "AND PB.ID_FLUJO_PAGOS = '2'\r\n"
-				+ ")\r\n"
-				+ "UNION ALL\r\n"
-				+ "(\r\n"
-				+ "SELECT \r\n"
-				+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
-				+ "PB.ID_VELATORIO AS idVelatorio, \r\n"
-				+ "PB.FEC_ODS AS fecha, \r\n"
-				+ "PB.CVE_FOLIO AS folio, \r\n"
-				+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
-				+ "PB.ID_FLUJO_PAGOS AS idFlujoPagos,\r\n"
-				+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
-				+ "(SELECT \r\n"
-				+ "GROUP_CONCAT( MP.DESC_METODO_PAGO SEPARATOR ', ' )\r\n"
-				+ "FROM SVC_METODO_PAGO MP\r\n"
-				+ "INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO\r\n"
-				+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
-				+ "AND PD.CVE_ESTATUS = '4' \r\n"
-				+ " ) AS metodoPago,\r\n"
-				+ "PB.DESC_VALOR AS total, \r\n"
-				+ "'Vigente' AS estatus, \r\n"
-				+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
-				+ "0 AS generarPagare \r\n"
-				+ "FROM SVT_PAGO_BITACORA PB \r\n"
-				+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS \r\n"
-				+ "INNER JOIN SVC_ESTATUS_PAGO EOSP ON EOSP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
-				+ "INNER JOIN SVT_RENOVACION_CONVENIO_PF RPF ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO\r\n"
-				+ "WHERE \r\n"
-				+ "RPF.IND_ESTATUS = '1'\r\n"
-				+ "AND PB.ID_FLUJO_PAGOS = '3'\r\n"
-				+ ")\r\n"
-				+ ")\r\n"
-				+ "T"
-				);
+		StringBuilder query = new StringBuilder(CONSULTA_TABLA);
+		
 		if( validarWhere(filtros) ) {
-			
-			query.append( " WHERE " );
-			
-			int i=0;
-			
-			
-			if( (filtros.getIdVelatorio()!=null && !filtros.getIdVelatorio().isEmpty() )) {
-				query.append( "T.idVelatorio = '" + filtros.getIdVelatorio() + "' " );
-				i++;
-			}
-			
-			if( (filtros.getIdFlujoPagos()!=null && !filtros.getIdFlujoPagos().isEmpty() )) {
-				
-				if(i>=1) {
-					query.append( "AND ");
-				}
-				
-				query.append( "T.idFlujoPagos = '" + filtros.getIdFlujoPagos() +"' " );
-				i++;
-			}
-			
-			if( (filtros.getFolio()!=null && !filtros.getFolio().isEmpty() )) {
-				
-				if(i>=1) {
-					query.append( "AND ");
-				}
-				
-				query.append( "T.folio LIKE CONCAT('" + filtros.getFolio() + "', '%') " );
-				i++;
-			}
-			
-			if( (filtros.getNomContratante()!=null && !filtros.getNomContratante().isEmpty() ) ) {
-				
-				if(i>=1) {
-					query.append( "AND ");
-				}
-				
-				query.append( "T.nomContratante LIKE CONCAT('"+ filtros.getNomContratante() + "', '%') " );
-				i++;
-			}
-			
-			if( (filtros.getFechaInicio()!=null && !filtros.getFechaInicio().isEmpty() ) ) {
-				
-				if(i>=1) {
-					query.append( "AND ");
-				}
-				
-				query.append( "T.fecha BETWEEN '" + filtros.getFechaInicio() + "' AND '" + filtros.getFechaFin() + "' " );
-			}
-			
+			query.append( construyeFiltros(filtros) );
 		}
 		
 		return query.toString();
@@ -499,5 +454,75 @@ public class PagosUtil {
 	
 		return q.obtenerQueryActualizar();
 		
+	}
+	
+	public Map<String, Object> generarReportePDF(FiltroRequest filtros, String nombrePdfReportes) {
+		Map<String, Object> envioDatos = new HashMap<>();
+		StringBuilder condicion = new StringBuilder(" ");
+		
+		if( validarWhere(filtros) ) {
+			condicion.append( construyeFiltros(filtros) );
+		}
+		
+		envioDatos.put("filtros", condicion);
+		envioDatos.put("tipoReporte", filtros.getTipoReporte());
+		envioDatos.put("rutaNombreReporte", nombrePdfReportes);
+
+		return envioDatos;
+	}
+	
+	private String construyeFiltros(FiltroRequest filtros) {
+		StringBuilder query = new StringBuilder("");
+		
+		query.append( " WHERE " );
+		
+		int i=0;
+		
+		
+		if( (filtros.getIdVelatorio()!=null && !filtros.getIdVelatorio().isEmpty() )) {
+			query.append( "T.idVelatorio = '" + filtros.getIdVelatorio() + "' " );
+			i++;
+		}
+		
+		if( (filtros.getIdFlujoPagos()!=null && !filtros.getIdFlujoPagos().isEmpty() )) {
+			
+			if(i>=1) {
+				query.append( "AND ");
+			}
+			
+			query.append( "T.idFlujoPagos = '" + filtros.getIdFlujoPagos() +"' " );
+			i++;
+		}
+		
+		if( (filtros.getFolio()!=null && !filtros.getFolio().isEmpty() )) {
+			
+			if(i>=1) {
+				query.append( "AND ");
+			}
+			
+			query.append( "T.folio LIKE CONCAT('" + filtros.getFolio() + "', '%') " );
+			i++;
+		}
+		
+		if( (filtros.getNomContratante()!=null && !filtros.getNomContratante().isEmpty() ) ) {
+			
+			if(i>=1) {
+				query.append( "AND ");
+			}
+			
+			query.append( "T.nomContratante LIKE CONCAT('"+ filtros.getNomContratante() + "', '%') " );
+			i++;
+		}
+		
+		if( (filtros.getFechaInicio()!=null && !filtros.getFechaInicio().isEmpty() ) ) {
+			
+			if(i>=1) {
+				query.append( "AND ");
+			}
+			
+			query.append( "T.fecha BETWEEN '" + filtros.getFechaInicio() + "' AND '" + filtros.getFechaFin() + "' " );
+		}
+		
+		return query.toString();
 	}
 }

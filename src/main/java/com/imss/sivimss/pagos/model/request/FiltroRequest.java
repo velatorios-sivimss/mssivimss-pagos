@@ -22,5 +22,5 @@ public class FiltroRequest {
 	private String nomContratante;
 	private String fechaInicio;
 	private String fechaFin;
-	
+	private String tipoReporte;
 }

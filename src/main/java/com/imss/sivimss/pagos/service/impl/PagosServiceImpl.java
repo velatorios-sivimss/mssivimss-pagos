@@ -36,6 +36,9 @@ public class PagosServiceImpl implements PagosService {
 	@Value("${endpoints.dominio}")
 	private String urlDomino;
 	
+	@Value("${endpoints.ms-reportes}")
+	private String urlReportes;
+	
 	@Autowired
 	private LogUtil logUtil;
 	
@@ -50,7 +53,8 @@ public class PagosServiceImpl implements PagosService {
 	private static final String CONSULTA_GENERICA = "/consulta";
 	private static final String ACTUALIZAR_MULTIPLES = "/actualizar/multiples";
 	private static final String SIN_INFORMACION = "45";
-	
+	private static final String NOM_REPORTE = "reportes/generales/ReporteTablaPagos.jrxml";
+	private static final String ERROR_AL_DESCARGAR_DOCUMENTO= "64"; // Error en la descarga del documento.Intenta nuevamente.
 	@Override
 	public Response<Object> buscar(DatosRequest request, Authentication authentication) throws IOException {
 		
@@ -368,6 +372,20 @@ public class PagosServiceImpl implements PagosService {
 				authentication);
 		
 		return response;
+	}
+
+	@Override
+	public Response<Object> generartablaPDF(DatosRequest request, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+		FiltroRequest filtrosRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), FiltroRequest.class);
+		PagosUtil pagosUtil = new PagosUtil();
+		Map<String, Object> envioDatos = pagosUtil.generarReportePDF(filtrosRequest, NOM_REPORTE);
+		
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "",CONSULTA +" " + envioDatos, authentication);
+		
+		return MensajeResponseUtil.mensajeConsultaResponse(providerRestTemplate.consumirServicioReportes(envioDatos, urlReportes,authentication)
+				, ERROR_AL_DESCARGAR_DOCUMENTO);
 	}
 
 }
