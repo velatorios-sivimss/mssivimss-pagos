@@ -174,6 +174,14 @@ public class PagosServiceImpl implements PagosService {
 				encoded = DatatypeConverter.printBase64Binary(query.getBytes());
 				querys.add( encoded );
 				
+			} else if ( crearRequest.getIdFlujoPago().equals(2) ) {
+				
+				query = pagosUtil.actConPF( crearRequest.getIdRegistro(), usuarioDto.getIdUsuario() );
+				logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+						this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+				encoded = DatatypeConverter.printBase64Binary(query.getBytes());
+				querys.add( encoded );
+				
 			}
 			
 			query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "4", "0" );

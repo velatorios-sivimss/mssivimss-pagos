@@ -306,6 +306,18 @@ public class PagosUtil {
 		return q.obtenerQueryActualizar();
 	}
 	
+	public String actConPF(String idOds, Integer idUsuario) {
+		
+		QueryHelper q = new QueryHelper("UPDATE SVT_CONVENIO_PF");
+		q.agregarParametroValues("ID_ESTATUS_CONVENIO", "2");
+		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
+		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
+		q.addWhere("ID_CONVENIO_PF = " + idOds);
+		q.addWhere("AND ID_ESTATUS_CONVENIO IN ('1')");
+		
+		return q.obtenerQueryActualizar();
+	}
+	
 	public String actPB(String idPb, Integer idUsuario, String idEstatus, String generarPagare) {
 		
 		QueryHelper q = new QueryHelper("UPDATE SVT_PAGO_BITACORA");
