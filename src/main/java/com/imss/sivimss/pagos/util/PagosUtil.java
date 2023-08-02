@@ -325,7 +325,7 @@ public class PagosUtil {
 		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
 		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
 		q.addWhere("ID_RENOVACION_CONVENIO_PF = " + idOds);
-		q.addWhere("AND ID_ESTATUS_CONVENIO IN ('1')");
+		q.addWhere("AND ID_ESTATUS IN ('1')");
 		
 		return q.obtenerQueryActualizar();
 	}
