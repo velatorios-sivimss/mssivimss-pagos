@@ -243,7 +243,7 @@ public class GestionarPagos {
     public DatosRequest detallePagos(DatosRequest request, String formatoFecha, Integer idPagoBitacora) throws UnsupportedEncodingException {
     	StringBuilder query = new StringBuilder("SELECT PD.ID_PAGO_DETALLE AS idPagoDetalle, PD.ID_METODO_PAGO AS idMetodoPago, MP.DESC_METODO_PAGO AS desMetodoPago, ");
     	query.append("PD.IMP_IMPORTE AS importe, DATE_FORMAT(PD.FEC_PAGO,'" + formatoFecha + "') AS fecPago, PD.NUM_AUTORIZACION AS numAutorizacion, ");
-    	query.append("PD.DES_BANCO AS desBanco, DATE_FORMAT(PD.FEC_VALE_AGF,'" + formatoFecha + "') AS fecValeAgf \n");
+    	query.append("PD.REF_BANCO AS desBanco, DATE_FORMAT(PD.FEC_VALE_AGF,'" + formatoFecha + "') AS fecValeAgf \n");
     	query.append("FROM SVT_PAGO_DETALLE PD ");
     	query.append("JOIN SVC_METODO_PAGO MP ON MP.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
     	query.append("WHERE PD.ID_PAGO_BITACORA = " + idPagoBitacora);
@@ -419,7 +419,7 @@ public class GestionarPagos {
     private StringBuilder consultaRpf() {
     	StringBuilder query = new StringBuilder("SELECT RPF.ID_RENOVACION_CONVENIO_PF AS id, DATE_FORMAT(RPF.FEC_ALTA,'" + formatoFecLocal + "') AS fecha, RPF.DES_FOLIO_ADENDA AS folio, ");
     	query.append("PB.NOM_CONTRATANTE AS nomContratante, 3 AS idFlujo,'Pago de Renovacion Previsión Funeraria' AS desFlujo, ");
-    	query.append("SUM(PD.IMP_IMPORTE) AS total, PF.ID_ESTATUS_CONVENIO AS idEstatus,  ");
+    	query.append("SUM(PD.IMP_PAGO) AS total, PF.ID_ESTATUS_CONVENIO AS idEstatus,  ");
     	query.append("ECPF.DES_ESTATUS desEstatus, PB.CVE_ESTATUS_PAGO AS idEstatusPago, ");
     	query.append("EPAG.DES_ESTATUS desEstatusPago, PD.ID_METODO_PAGO AS idMetodoPago, ");
     	query.append("MET.DESC_METODO_PAGO AS desMetodoPago,  ");
