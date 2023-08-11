@@ -80,7 +80,7 @@ public class GestionarPagos {
     	query.append("FROM SVT_RENOVACION_CONVENIO_PF RPF \n");
     	query.append("JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF = RPF.ID_CONVENIO_PF \n");
     	query.append("JOIN SVT_PAGO_BITACORA PB ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO \n");
-    	query.append("WHERE RPF.IND_ESTATUS = 1 \n");
+    	query.append("WHERE RPF.ID_ESTATUS = 1 \n");
     	query.append("AND PB.CVE_ESTATUS_PAGO IN (0, 2, 3, 4, 5) \n");
     	query.append("AND PB.ID_FLUJO_PAGOS = '3' ");
         if (busqueda.getIdVelatorio() != null) {
@@ -230,7 +230,7 @@ public class GestionarPagos {
     	       query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = PF.ID_CONVENIO_PF ");
     	       query.append("JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO ");
     	       query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO \n");
-    	       query.append("WHERE RPF.IND_ESTATUS = 1 AND PB.CVE_ESTATUS_PAGO IN (4, 5) ");
+    	       query.append("WHERE RPF.ID_ESTATUS = 1 AND PB.CVE_ESTATUS_PAGO IN (4, 5) ");
     	       query.append("AND RPF.ID_RENOVACION_CONVENIO_PF = " + this.idPago);
     	       query.append(" AND PB.ID_FLUJO_PAGOS = '3' ");
     	}
@@ -445,7 +445,7 @@ public class GestionarPagos {
     	query.append("JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO ");
     	query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO ");
     	query.append("JOIN SVC_METODO_PAGO MET ON MET.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
-    	query.append("WHERE RPF.IND_ESTATUS = 1 ");
+    	query.append("WHERE RPF.ID_ESTATUS = 1 ");
     	query.append("AND PB.CVE_ESTATUS_PAGO IN (2, 3, 4, 5) ");
     	query.append("AND PB.ID_FLUJO_PAGOS = '3' \n");
     	
