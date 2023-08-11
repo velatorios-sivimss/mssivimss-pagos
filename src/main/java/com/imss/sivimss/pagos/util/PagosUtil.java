@@ -187,12 +187,12 @@ public class PagosUtil {
 				+ "INNER JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO\r\n"
 				+ "WHERE\r\n"
 				+ "PB.ID_FLUJO_PAGOS = '2'\r\n"
-				+ "AND PF.ID_ESTATUS_CONVENIO = '1'\r\n"
+				+ "AND PF.ID_ESTATUS_CONVENIO IN (1,2)\r\n"
 				+ ") T";
 		break;
 		default:query = query + "INNER JOIN SVT_RENOVACION_CONVENIO_PF RPF ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO\r\n"
 				+ "WHERE\r\n"
-				+ "RPF.ID_ESTATUS = '1'\r\n"
+				+ "RPF.ID_ESTATUS IN (1,2)\r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '3'\r\n"
 				+ ") T";
 		}
@@ -228,7 +228,7 @@ public class PagosUtil {
 				+ "INNER JOIN SVC_ESTATUS_CONVENIO_PF EPF ON EPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO\r\n"
 				+ "INNER JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO =PF.ID_CONVENIO_PF \r\n"
 				+ "WHERE\r\n"
-				+ "PF.ID_ESTATUS_CONVENIO = '1'\r\n"
+				+ "PF.ID_ESTATUS_CONVENIO IN (1,2)\r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '2' \r\n"
 				+ "ORDER BY PF.FEC_ALTA ASC";
 		return query;
@@ -244,7 +244,7 @@ public class PagosUtil {
 				+ "INNER JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF = RPF.ID_CONVENIO_PF\r\n"
 				+ "INNER JOIN SVT_PAGO_BITACORA PB ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO \r\n"
 				+ "WHERE\r\n"
-				+ "RPF.ID_ESTATUS = '1'\r\n"
+				+ "RPF.ID_ESTATUS IN (1,2)\r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '3' \r\n"
 				+ "ORDER BY RPF.FEC_ALTA ASC;";
 		return query;
