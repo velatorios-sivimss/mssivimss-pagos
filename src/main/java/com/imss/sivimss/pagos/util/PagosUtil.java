@@ -20,7 +20,7 @@ public class PagosUtil {
 			+ "PB.CVE_FOLIO AS folio,\r\n"
 			+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
 			+ "CAST(PB.DESC_VALOR AS double) AS total,\r\n"
-			+ "IFNULL( (SELECT SUM(PD.IMP_IMPORTE)\r\n"
+			+ "IFNULL( (SELECT SUM(PD.IMP_PAGO)\r\n"
 			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
 			+ "WHERE \r\n"
 			+ "PD.ID_PAGO_BITACORA = idPagoBitacora "
@@ -40,7 +40,7 @@ public class PagosUtil {
 			+ "PB.CVE_FOLIO AS folio,\r\n"
 			+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
 			+ "CAST(PB.DESC_VALOR AS double) AS total,\r\n"
-			+ "IFNULL( (SELECT SUM(PD.IMP_IMPORTE)\r\n"
+			+ "IFNULL( (SELECT SUM(PD.IMP_PAGO)\r\n"
 			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
 			+ "WHERE \r\n"
 			+ "PD.ID_PAGO_BITACORA = idPagoBitacora AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado,\r\n"
@@ -286,14 +286,14 @@ public class PagosUtil {
 		QueryHelper q = new QueryHelper("INSERT INTO SVT_PAGO_DETALLE");
 		q.agregarParametroValues("ID_PAGO_BITACORA", "'" + datos.getIdPagoBitacora() + "'");
 		q.agregarParametroValues("ID_METODO_PAGO", "'" + datos.getIdMetodoPago() + "'");
-		q.agregarParametroValues("IMP_IMPORTE", datos.getImportePago().toString());
+		q.agregarParametroValues("IMP_PAGO", datos.getImportePago().toString());
 		
 		if( datos.getNumAutorizacion()!= null ) {
 			q.agregarParametroValues("NUM_AUTORIZACION", "'" + datos.getNumAutorizacion() + "'");
 		}
 		
 		if( datos.getDescBanco() !=null ) {
-			q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
+			q.agregarParametroValues("REF_BANCO", "'" + datos.getDescBanco() + "'");
 		}
 		
 		if( datos.getFechaPago() != null ) {	
@@ -314,7 +314,7 @@ public class PagosUtil {
 	public String totalPagado(String idPagoBitacora){
 		
 		StringBuilder query = new StringBuilder("SELECT IFNULL(\r\n"
-				+ "(SELECT SUM(PD.IMP_IMPORTE)\r\n"
+				+ "(SELECT SUM(PD.IMP_PAGO)\r\n"
 				+ "FROM  SVT_PAGO_DETALLE PD\r\n"
 				+ "WHERE\r\n"
 				+ "PD.ID_PAGO_BITACORA = ");
@@ -384,7 +384,7 @@ public class PagosUtil {
 				+ "EOS.DES_ESTATUS AS estatusPago,\r\n"
 				+ "CAST(PB.DESC_VALOR AS double) AS totalAPagar,\r\n"
 				+ "CONCAT('\"', FP.DESC_FLUJO_PAGOS,'\"') AS tipoPago,\r\n"
-				+ "IFNULL( (SELECT SUM(PD.IMP_IMPORTE)\r\n"
+				+ "IFNULL( (SELECT SUM(PD.IMP_PAGO)\r\n"
 				+ "FROM SVT_PAGO_DETALLE PD \r\n"
 				+ "WHERE \r\n"
 				+ "PD.ID_PAGO_BITACORA = ");
@@ -407,9 +407,9 @@ public class PagosUtil {
 				+ "PD.ID_PAGO_DETALLE AS idPagoDetalle,\r\n"
 				+ "MP.DESC_METODO_PAGO AS metodoPago,\r\n"
 				+ "PD.ID_METODO_PAGO AS idMetodoPago,\r\n"
-				+ "PD.IMP_IMPORTE AS importe,\r\n"
+				+ "PD.IMP_PAGO AS importe,\r\n"
 				+ "PD.NUM_AUTORIZACION AS numAutorizacion,\r\n"
-				+ "PD.DES_BANCO AS nomBanco,\r\n"
+				+ "PD.REF_BANCO AS nomBanco,\r\n"
 				+ "PD.FEC_PAGO AS fechaPago,\r\n"
 				+ "PD.FEC_VALE_AGF AS fechaValeParAGF,\r\n"
 				+ "PD.CVE_ESTATUS AS idEstatusPago,\r\n"
@@ -440,7 +440,7 @@ public class PagosUtil {
 	public String actualizar(CrearRequest datos, Integer idUsuario) {
 		
 		QueryHelper q = new QueryHelper("UPDATE SVT_PAGO_DETALLE");
-		q.agregarParametroValues("IMP_IMPORTE", datos.getImportePago().toString());
+		q.agregarParametroValues("IMP_PAGO", datos.getImportePago().toString());
 		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
 		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
 		
@@ -455,9 +455,9 @@ public class PagosUtil {
 			}
 			
 			if( datos.getDescBanco() !=null ) {
-				q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
+				q.agregarParametroValues("REF_BANCO", "'" + datos.getDescBanco() + "'");
 			} else {
-				q.agregarParametroValues("DES_BANCO", "null");
+				q.agregarParametroValues("REF_BANCO", "null");
 			}
 			
 			if( datos.getFechaPago() != null ) {	
@@ -479,7 +479,7 @@ public class PagosUtil {
 			}
 			
 			if( datos.getDescBanco() !=null ) {
-				q.agregarParametroValues("DES_BANCO", "'" + datos.getDescBanco() + "'");
+				q.agregarParametroValues("REF_BANCO", "'" + datos.getDescBanco() + "'");
 			}
 			
 			if( datos.getFechaPago() != null ) {	
