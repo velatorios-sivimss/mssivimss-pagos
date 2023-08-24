@@ -201,6 +201,7 @@ public class GestionarServiceImpl implements GestionarService {
 		    ArrayList datos1 = (ArrayList) response.getDatos();
 		    if (!datos1.isEmpty()) {
 			    listaDatos = Arrays.asList(modelMapper.map(datos1, Map[].class));
+			    detalle.setId((Integer)listaDatos.get(0).get("id"));
 			    detalle.setFecha(listaDatos.get(0).get("fecha").toString());
 			    detalle.setFolio(listaDatos.get(0).get("folio").toString());
 			    detalle.setNomContratante(listaDatos.get(0).get("nomContratante").toString());
@@ -210,6 +211,7 @@ public class GestionarServiceImpl implements GestionarService {
 			    detalle.setDesEstatus(listaDatos.get(0).get("desEstatus").toString());
 			    detalle.setDesEstatusPago(listaDatos.get(0).get("desEstatusPago").toString());
 			    detalle.setIdPagoBitacora((Integer) listaDatos.get(0).get("idPagoBitacora"));
+			    detalle.setMontoTotal((Double)listaDatos.get(0).get("montoTotal"));
 		    
 			    response = providerRestTemplate.consumirServicio(gestionPagos.detallePagos(request, formatoFecha, detalle.getIdPagoBitacora()).getDatos(), urlDominio + CONSULTA, authentication);
 			    listaDatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
@@ -302,7 +304,6 @@ public class GestionarServiceImpl implements GestionarService {
 		try {
 			return providerRestTemplate.consumirServicio(gestionPagos.cancelacion(cancelaResponse).getDatos(), urlDominio + MULTIPLE, authentication);
 		} catch (Exception e) {
-			e.printStackTrace();
 			log.error(e.getMessage());
 			logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), ACTUALIZAR, authentication);
 			return null;
