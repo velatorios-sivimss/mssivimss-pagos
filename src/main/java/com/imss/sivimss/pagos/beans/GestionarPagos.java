@@ -24,6 +24,8 @@ public class GestionarPagos {
 	private static final Integer NIVEL_DELEGACION = 2;
 	private static final Integer NIVEL_VELATORIO = 3;
 	
+	private static final String FOLIO_INEXISTENTE = "'XXXXXXXXXXXX'";
+	
 	private String formatoFecLocal;
 	
 	public GestionarPagos(Integer idFlujo, Integer idPago) {
@@ -139,7 +141,9 @@ public class GestionarPagos {
     	}
     	if (busqueda.getFolioODS() != null) {
     		queryCompleto.append(" AND OS.CVE_FOLIO = '").append(busqueda.getFolioODS()).append("' ");
-    	} 
+    	} else if (busqueda.getFolioPF() != null || busqueda.getFolioRPF() != null) {
+    		queryCompleto.append(" AND OS.CVE_FOLIO = ").append(FOLIO_INEXISTENTE);
+    	}
     	if (busqueda.getNomContratante() != null) {
     		queryCompleto.append(" AND PB.NOM_CONTRATANTE LIKE '%").append(busqueda.getNomContratante()).append("%'");
     	}
@@ -156,7 +160,9 @@ public class GestionarPagos {
     	}
     	if (busqueda.getFolioPF() != null) {
     		queryCompleto.append(" AND PF.DES_FOLIO = '").append(busqueda.getFolioPF()).append("' ");
-    	} 
+    	} else if (busqueda.getFolioODS() != null || busqueda.getFolioRPF() != null) {
+    		queryCompleto.append(" AND PF.DES_FOLIO = ").append(FOLIO_INEXISTENTE);
+    	}
     	if (busqueda.getNomContratante() != null) {
     		queryCompleto.append(" AND PB.NOM_CONTRATANTE LIKE '%").append(busqueda.getNomContratante()).append("%'");
     	}
@@ -173,7 +179,9 @@ public class GestionarPagos {
     	}
     	if (busqueda.getFolioRPF() != null) {
     		queryCompleto.append(" AND RPF.DES_FOLIO_ADENDA = '").append(busqueda.getFolioRPF()).append("' ");
-    	} 
+    	} else if (busqueda.getFolioODS() != null || busqueda.getFolioPF() != null) {
+    		queryCompleto.append(" AND RPF.DES_FOLIO_ADENDA = ").append(FOLIO_INEXISTENTE);
+    	}
     	if (busqueda.getNomContratante() != null) {
     		queryCompleto.append(" AND PB.NOM_CONTRATANTE LIKE '%").append(busqueda.getNomContratante()).append("%'");
     	}
@@ -327,6 +335,8 @@ public class GestionarPagos {
 		}
 		if (reporteDto.getFolioODS() != null) {
     		condicion1.append(" AND OS.CVE_FOLIO = '").append(reporteDto.getFolioODS()).append("' ");
+    		condicion2.append(" AND PF.DES_FOLIO = ").append(FOLIO_INEXISTENTE);
+    		condicion3.append(" AND RPF.DES_FOLIO_ADENDA = ").append(FOLIO_INEXISTENTE);
     	} 
     	if (reporteDto.getNomContratante() != null) {
     		condicion1.append(" AND PB.NOM_CONTRATANTE LIKE '%").append(reporteDto.getNomContratante()).append("%'");
@@ -339,7 +349,9 @@ public class GestionarPagos {
     		condicion2.append(" AND PF.ID_VELATORIO = ").append(reporteDto.getIdVelatorio());
     	}
     	if (reporteDto.getFolioPF() != null) {
+    		condicion1.append(" AND OS.CVE_FOLIO = ").append(FOLIO_INEXISTENTE);
     		condicion2.append(" AND PF.DES_FOLIO = '").append(reporteDto.getFolioPF()).append("' ");
+    		condicion3.append(" AND RPF.DES_FOLIO_ADENDA = ").append(FOLIO_INEXISTENTE);
     	} 
     	if (reporteDto.getNomContratante() != null) {
     		condicion2.append(" AND PB.NOM_CONTRATANTE LIKE '%").append(reporteDto.getNomContratante()).append("%'");
@@ -352,6 +364,8 @@ public class GestionarPagos {
     		condicion3.append(" AND PF.ID_VELATORIO = ").append(reporteDto.getIdVelatorio());
     	}
     	if (reporteDto.getFolioRPF() != null) {
+    		condicion1.append(" AND OS.CVE_FOLIO = ").append(FOLIO_INEXISTENTE);
+    		condicion2.append(" AND PF.DES_FOLIO = ").append(FOLIO_INEXISTENTE);
     		condicion3.append(" AND RPF.DES_FOLIO_ADENDA = '").append(reporteDto.getFolioRPF()).append("' ");
     	} 
     	if (reporteDto.getNomContratante() != null) {
