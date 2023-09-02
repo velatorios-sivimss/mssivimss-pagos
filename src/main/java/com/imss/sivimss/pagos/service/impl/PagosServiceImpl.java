@@ -397,6 +397,10 @@ public class PagosServiceImpl implements PagosService {
 		PagosUtil pagosUtil = new PagosUtil();
 		Map<String, Object> envioDatos = pagosUtil.generarReportePDF(filtrosRequest, NOM_REPORTE);
 		
+		if(filtrosRequest.getTipoReporte().equals("xls")) {
+            envioDatos.put("IS_IGNORE_PAGINATION", true);
+        }
+		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + envioDatos, authentication);
 		
