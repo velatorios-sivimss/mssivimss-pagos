@@ -379,6 +379,9 @@ public class GestionarPagos {
 		envioDatos.put("condicion2", condicion2.toString());
 		envioDatos.put("condicion3", condicion3.toString());
 		envioDatos.put("tipoReporte", reporteDto.getTipoReporte());
+		if (reporteDto.getTipoReporte().equals("xls")) {
+			envioDatos.put("IS_IGNORE_PAGINATION", true);
+		}
 		envioDatos.put("rutaNombreReporte", nombrePdfReportes);
 		
 		return envioDatos;
