@@ -331,7 +331,7 @@ public class GestionarPagos {
 		StringBuilder condicion3 = new StringBuilder(" ");
 		// ODS
 		if (reporteDto.getIdVelatorio() != null) {
-			condicion1.append(" AND os.ID_VELATORIO = ").append(reporteDto.getIdVelatorio());
+			condicion1.append(" AND OS.ID_VELATORIO = ").append(reporteDto.getIdVelatorio());
 		}
 		if (reporteDto.getFolioODS() != null) {
     		condicion1.append(" AND OS.CVE_FOLIO = '").append(reporteDto.getFolioODS()).append("' ");
@@ -379,10 +379,10 @@ public class GestionarPagos {
 		envioDatos.put("condicion2", condicion2.toString());
 		envioDatos.put("condicion3", condicion3.toString());
 		envioDatos.put("tipoReporte", reporteDto.getTipoReporte());
+		envioDatos.put("rutaNombreReporte", nombrePdfReportes);
 		if (reporteDto.getTipoReporte().equals("xls")) {
 			envioDatos.put("IS_IGNORE_PAGINATION", true);
 		}
-		envioDatos.put("rutaNombreReporte", nombrePdfReportes);
 		
 		return envioDatos;
 	}
