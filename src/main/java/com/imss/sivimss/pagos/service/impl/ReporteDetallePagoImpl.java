@@ -23,6 +23,7 @@ import com.imss.sivimss.pagos.service.ReporteDetallePagoService;
 import com.imss.sivimss.pagos.util.AppConstantes;
 import com.imss.sivimss.pagos.util.DatosRequest;
 import com.imss.sivimss.pagos.util.LogUtil;
+import com.imss.sivimss.pagos.util.MensajeResponseUtil;
 import com.imss.sivimss.pagos.util.ProviderServiceRestTemplate;
 import com.imss.sivimss.pagos.util.Response;
 
@@ -72,8 +73,13 @@ public class ReporteDetallePagoImpl implements ReporteDetallePagoService{
 
 	@Override
 	public Response<?> buscarOds(DatosRequest request, Authentication authentication) throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+		String datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		Response<?> response;
+		ReporteDetallePagoDto  filtros = gson.fromJson(datosJson, ReporteDetallePagoDto .class);
+		 response = MensajeResponseUtil.mensajeConsultaResponse(providerRestTemplate.consumirServicio(detallePago.catalogoFolios(request, filtros).getDatos(), urlConsulta+"/consulta",
+					authentication), EXITO);
+		    	   logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),this.getClass().getPackage().toString(),"CONSULTA ARTICULOS CONSIGNADOS OK", CONSULTA, authentication);   	
+	    	   return response;
 	}
 	
 	 public String formatFecha(String fecha) throws ParseException {
