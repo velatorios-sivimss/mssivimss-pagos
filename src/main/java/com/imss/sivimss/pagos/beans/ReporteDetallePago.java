@@ -30,8 +30,11 @@ public class ReporteDetallePago {
 			condition.append(" AND SOS.ID_ORDEN_SERVICIO = "+reporte.getId_ods()+"");
 		}
 		if(reporte.getFecha_inicial()!=null) {
-			condition.append(" AND SOS.FEC_ALTA BETWEEN '"+reporte.getFecInicioConsulta()+ " 00:00:01' AND '"+reporte.getFecFinConsulta()+" 23:59:59'");
+			condition.append(" AND SOS.FEC_ALTA >= '"+reporte.getFecInicioConsulta()+"'");
 			envioDatos.put("fecInicio", reporte.getFecha_inicial());
+		}
+		if(reporte.getFecha_final()!=null) {
+			condition.append(" AND SOS.FEC_ALTA <= '"+reporte.getFecFinConsulta()+"'");
 			envioDatos.put("fecFin", reporte.getFecha_final());
 		}
 		log.info("reporte -> "+condition.toString());
