@@ -59,7 +59,9 @@ public class ReporteDetallePagoImpl implements ReporteDetallePagoService{
 		ReporteDetallePagoDto reporte= gson.fromJson(datosJson, ReporteDetallePagoDto .class);
 		if(reporte.getFecha_inicial()!=null) {
 			reporte.setFecInicioConsulta(formatFecha(reporte.getFecha_inicial()));
-   	   		reporte.setFecFinConsulta(formatFecha(reporte.getFecha_final()));
+		}
+		if(reporte.getFecha_final()!=null) {
+			reporte.setFecFinConsulta(formatFecha(reporte.getFecha_final()));
 		}
 		if(reporte.getTipoReporte()==null) {
 			throw new BadRequestException(HttpStatus.BAD_REQUEST, INFORMACION_INCOMPLETA);
