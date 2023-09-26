@@ -69,7 +69,7 @@ public class ReporteDetallePagoImpl implements ReporteDetallePagoService{
 		Map<String, Object> envioDatos = detallePago.generarReporte(reporte, reporteDetPago);
 		Response<?> response = providerRestTemplate.consumirServicioReportes(envioDatos, urlReportes,
 				authentication);
-		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),this.getClass().getPackage().toString(),"SE GENERO CORRECTAMENTE EL REPORTE SERVICIOS VELATORIOS", IMPRIMIR, authentication);
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),this.getClass().getPackage().toString(),"SE GENERO CORRECTAMENTE EL REPORTE DETALLE PAGO", IMPRIMIR, authentication);
 		return response;
 	}
 
