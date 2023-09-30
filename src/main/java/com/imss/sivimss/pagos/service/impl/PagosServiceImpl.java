@@ -228,6 +228,20 @@ public class PagosServiceImpl implements PagosService {
 		response = providerRestTemplate.consumirServicioActMult(actualizarMultiRequest, urlDomino + ACTUALIZAR_MULTIPLES, 
 				authentication);
 		
+		if( crearRequest.getIdMetodoPago().equals("2")) {
+			
+			query = pagosUtil.detalleAGF( crearRequest.getIdPagoBitacora() );
+			
+			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+					this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+			
+			request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
+			
+			response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+					authentication);
+		}
+		
+		
 		return response;
 	
 	}

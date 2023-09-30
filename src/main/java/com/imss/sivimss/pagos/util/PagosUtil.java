@@ -60,7 +60,13 @@ public class PagosUtil {
 			+ "INNER JOIN SVC_CONTRATANTE CON ON CON.ID_CONTRATANTE = OS.ID_CONTRATANTE\r\n"
 			+ "INNER JOIN SVC_PERSONA PER ON PER.ID_PERSONA = CON.ID_PERSONA\r\n"
 			+ "WHERE\r\n"
-			+ "OS.ID_ORDEN_SERVICIO = idRegistro ) AS nss\r\n"
+			+ "OS.ID_ORDEN_SERVICIO = idRegistro ) AS nss,\r\n"
+			+ "(SELECT\r\n"
+			+ "ID_FINADO\r\n"
+			+ "FROM SVC_FINADO\r\n"
+			+ "WHERE\r\n"
+			+ "ID_ORDEN_SERVICIO = idRegistro \r\n"
+			+ "LIMIT 1) AS idFinado\r\n"
 			+ "FROM SVT_PAGO_BITACORA PB\r\n"
 			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
 			+ "INNER JOIN SVC_ORDEN_SERVICIO OS ON OS.ID_ORDEN_SERVICIO = PB.ID_REGISTRO\r\n"
@@ -577,6 +583,21 @@ public class PagosUtil {
 			query.append( "T.fecha BETWEEN '" + filtros.getFechaInicio() + "' AND '" + filtros.getFechaFin() + "' " );
 		}
 		
+		return query.toString();
+	}
+	
+	public String detalleAGF(String idPagoBitacora){
+		StringBuilder query = new StringBuilder("SELECT\r\n"
+				+ "ID_PAGO_DETALLE AS idPagoDetalle\r\n"
+				+ "FROM\r\n"
+				+ "SVT_PAGO_DETALLE\r\n"
+				+ "WHERE\r\n"
+				+ "ID_METODO_PAGO = 2\r\n"
+				+ "AND CVE_ESTATUS = 4\r\n"
+				+ "AND ID_PAGO_BITACORA = ");
+		
+		query.append(idPagoBitacora);
+		query.append( " LIMIT 1 ");
 		return query.toString();
 	}
 }
