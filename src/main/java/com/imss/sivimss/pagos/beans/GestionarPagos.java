@@ -255,7 +255,7 @@ public class GestionarPagos {
     	StringBuilder query = new StringBuilder("SELECT PD.ID_PAGO_DETALLE AS idPagoDetalle, PD.ID_METODO_PAGO AS idMetodoPago, MP.DESC_METODO_PAGO AS desMetodoPago, ");
     	query.append("PD.IMP_PAGO AS importe, DATE_FORMAT(PD.FEC_PAGO,'" + formatoFecha + "') AS fecPago, PD.NUM_AUTORIZACION AS numAutorizacion, ");
     	query.append("PD.REF_BANCO AS desBanco, DATE_FORMAT(PD.FEC_VALE_AGF,'" + formatoFecha + "') AS fecValeAgf, \n");
-        query.append("PD.DES_MOTIVO_MODIFICA AS motivoModifica, PD.DES_MOTIVO_CANCELA AS motivoCancela ");
+        query.append("PD.REF_MOTIVO_MODIFICA AS motivoModifica, PD.REF_MOTIVO_CANCELA AS motivoCancela ");
     	query.append("FROM SVT_PAGO_DETALLE PD ");
     	query.append("JOIN SVC_METODO_PAGO MP ON MP.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
     	query.append("WHERE PD.ID_PAGO_BITACORA = " + idPagoBitacora);
@@ -270,7 +270,7 @@ public class GestionarPagos {
     	DatosRequest request = new DatosRequest();
 		Map<String, Object> parametro = new HashMap<>();
 		String query =" UPDATE SVT_PAGO_DETALLE SET ID_USUARIO_MODIFICA = " + modificaResponse.getIdUsuarioModifica() +
-				", FEC_ACTUALIZACION = CURRENT_TIMESTAMP(), DES_MOTIVO_MODIFICA = '" + modificaResponse.getMotivoModifica() + "' " +
+				", FEC_ACTUALIZACION = CURRENT_TIMESTAMP(), REF_MOTIVO_MODIFICA = '" + modificaResponse.getMotivoModifica() + "' " +
 				"WHERE ID_PAGO_DETALLE = " + modificaResponse.getIdPagoDetalle();
 		
 		String encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
@@ -296,7 +296,7 @@ public class GestionarPagos {
     	Map<String, Object> parametro = new HashMap<>();
     	
     	StringBuilder query = new StringBuilder("UPDATE SVT_PAGO_DETALLE SET CVE_ESTATUS = 0, ID_USUARIO_MODIFICA = " + cancelaResponse.getIdUsuarioCancela());
-    	query.append(", FEC_ACTUALIZACION = CURRENT_TIMESTAMP(), DES_MOTIVO_CANCELA = '" + cancelaResponse.getMotivoCancela() + "' ");
+    	query.append(", FEC_ACTUALIZACION = CURRENT_TIMESTAMP(), REF_MOTIVO_CANCELA = '" + cancelaResponse.getMotivoCancela() + "' ");
     	query.append(" WHERE ID_PAGO_DETALLE = " + cancelaResponse.getIdPagoDetalle() + ";$$");
     	switch (this.idFlujo) {
  	      case 1:
