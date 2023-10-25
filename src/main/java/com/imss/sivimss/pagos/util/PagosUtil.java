@@ -19,7 +19,7 @@ public class PagosUtil {
 			+ "PB.FEC_ODS AS fechaPago,\r\n"
 			+ "PB.CVE_FOLIO AS folio,\r\n"
 			+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
-			+ "CAST(PB.DESC_VALOR AS double) AS total,\r\n"
+			+ "CAST(PB.IMP_VALOR AS double) AS total,\r\n"
 			+ "IFNULL( (SELECT SUM(PD.IMP_PAGO)\r\n"
 			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
 			+ "WHERE \r\n"
@@ -39,12 +39,12 @@ public class PagosUtil {
 			+ "PB.FEC_ODS AS fechaPago,\r\n"
 			+ "PB.CVE_FOLIO AS folio,\r\n"
 			+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
-			+ "CAST(PB.DESC_VALOR AS double) AS total,\r\n"
+			+ "CAST(PB.IMP_VALOR AS double) AS total,\r\n"
 			+ "IFNULL( (SELECT SUM(PD.IMP_PAGO)\r\n"
 			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
 			+ "WHERE \r\n"
 			+ "PD.ID_PAGO_BITACORA = idPagoBitacora AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado,\r\n"
-			+ "PB.GEN_PAGARE AS generarPagare,\r\n"
+			+ "PB.IND_GEN_PAGARE AS generarPagare,\r\n"
 			+ "EP.DES_ESTATUS AS estatusPago,\r\n"
 			+ "(SELECT COUNT( PD.ID_PAGO_DETALLE )\r\n"
 			+ "FROM SVT_PAGO_BITACORA PB\r\n"
@@ -95,10 +95,10 @@ public class PagosUtil {
 			+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
 			+ "AND PD.CVE_ESTATUS = '4' \r\n"
 			+ " ) AS metodoPago,\r\n"
-			+ "PB.DESC_VALOR AS total, \r\n"
+			+ "PB.IMP_VALOR AS total, \r\n"
 			+ "EOS.DES_ESTATUS AS estatus, \r\n"
 			+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
-			+ "PB.GEN_PAGARE AS generarPagare\r\n"
+			+ "PB.IND_GEN_PAGARE AS generarPagare\r\n"
 			+ "FROM SVT_PAGO_BITACORA PB \r\n"
 			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS \r\n"
 			+ "INNER JOIN SVC_ORDEN_SERVICIO OS ON OS.ID_ORDEN_SERVICIO = PB.ID_REGISTRO \r\n"
@@ -124,7 +124,7 @@ public class PagosUtil {
 			+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
 			+ "AND PD.CVE_ESTATUS = '4' \r\n"
 			+ " ) AS metodoPago,\r\n"
-			+ "PB.DESC_VALOR AS total, \r\n"
+			+ "PB.IMP_VALOR AS total, \r\n"
 			+ "ECPF.DES_ESTATUS AS estatus, \r\n"
 			+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
 			+ "0 AS generarPagare\r\n"
@@ -154,7 +154,7 @@ public class PagosUtil {
 			+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
 			+ "AND PD.CVE_ESTATUS = '4' \r\n"
 			+ " ) AS metodoPago,\r\n"
-			+ "PB.DESC_VALOR AS total, \r\n"
+			+ "PB.IMP_VALOR AS total, \r\n"
 			+ "'Vigente' AS estatus, \r\n"
 			+ "EOSP.DES_ESTATUS AS estatusPago,\r\n"
 			+ "0 AS generarPagare \r\n"
@@ -372,7 +372,7 @@ public class PagosUtil {
 		q.agregarParametroValues("CVE_ESTATUS_PAGO", idEstatus);
 		q.agregarParametroValues("FEC_ACTUALIZACION", "NOW()");
 		q.agregarParametroValues("ID_USUARIO_MODIFICA", idUsuario.toString());
-		q.agregarParametroValues("GEN_PAGARE", generarPagare);
+		q.agregarParametroValues("IND_GEN_PAGARE", generarPagare);
 		q.addWhere("ID_PAGO_BITACORA = " + idPb);
 	
 		return q.obtenerQueryActualizar();
@@ -388,7 +388,7 @@ public class PagosUtil {
 				+ "PB.CVE_FOLIO AS folio,\r\n"
 				+ "PB.CVE_ESTATUS_PAGO AS idEstatusPago,\r\n"
 				+ "EOS.DES_ESTATUS AS estatusPago,\r\n"
-				+ "CAST(PB.DESC_VALOR AS double) AS totalAPagar,\r\n"
+				+ "CAST(PB.IMP_VALOR AS double) AS totalAPagar,\r\n"
 				+ "CONCAT('\"', FP.DESC_FLUJO_PAGOS,'\"') AS tipoPago,\r\n"
 				+ "IFNULL( (SELECT SUM(PD.IMP_PAGO)\r\n"
 				+ "FROM SVT_PAGO_DETALLE PD \r\n"
