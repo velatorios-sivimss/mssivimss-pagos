@@ -14,6 +14,9 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DetalleResponse {
 	
+	private String idPagoBitacora;
+	private String idFlujoPago;
+	private String idRegistro;
 	private String folio;
 	private String idEstatusPago;
 	private String estatusPago;
@@ -21,5 +24,6 @@ public class DetalleResponse {
 	private Double totalPagado;
 	private Double totalPorCubrir;
 	private String tipoPago;
+	private String fechaUltimaPago;
 	private List<Map<String, Object>> metodosPago;
 }
