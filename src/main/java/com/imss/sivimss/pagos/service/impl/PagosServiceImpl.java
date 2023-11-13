@@ -39,6 +39,9 @@ public class PagosServiceImpl implements PagosService {
 	@Value("${endpoints.ms-reportes}")
 	private String urlReportes;
 	
+	@Value("${formato_fecha}")
+	private String formatoFecha;
+	
 	@Autowired
 	private LogUtil logUtil;
 	
@@ -256,7 +259,7 @@ public class PagosServiceImpl implements PagosService {
 		Response<Object> response;
 		List<Map<String, Object>> listadatos;
 		DetalleResponse detalle;
-		String query = pagosUtil.registroDetalle(crearRequest.getIdPagoBitacora() );
+		String query = pagosUtil.registroDetalle(crearRequest.getIdPagoBitacora(), formatoFecha );
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
@@ -270,7 +273,7 @@ public class PagosServiceImpl implements PagosService {
 		
 		detalle = gson.fromJson(String.valueOf(listadatos.get(0)), DetalleResponse.class);
 		
-		query = pagosUtil.pagoDetalle(crearRequest.getIdPagoBitacora() );
+		query = pagosUtil.pagoDetalle(crearRequest.getIdPagoBitacora(), formatoFecha );
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);

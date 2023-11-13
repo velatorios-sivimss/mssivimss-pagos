@@ -362,13 +362,16 @@ public class PagosUtil {
 		return q.obtenerQueryActualizar();
 	}
 	
-	public String registroDetalle(String idPagoBitacora){
+	public String registroDetalle(String idPagoBitacora, String formatoFecha){
 		
 		StringBuilder query = new StringBuilder("SELECT \r\n"
 				+ "T.*,\r\n"
 				+ "(T.totalAPagar - T.totalPagado) AS totalPorCubrir\r\n"
 				+ "FROM \r\n"
 				+ "(SELECT\r\n"
+				+ "PB.ID_PAGO_BITACORA AS idPagoBitacora,\r\n"
+				+ "PB.ID_FLUJO_PAGOS AS idFlujoPago,\r\n"
+				+ "PB.ID_REGISTRO AS idRegistro,\r\n"
 				+ "PB.CVE_FOLIO AS folio,\r\n"
 				+ "PB.CVE_ESTATUS_PAGO AS idEstatusPago,\r\n"
 				+ "EOS.DES_ESTATUS AS estatusPago,\r\n"
@@ -379,7 +382,22 @@ public class PagosUtil {
 				+ "WHERE \r\n"
 				+ "PD.ID_PAGO_BITACORA = ");
 		query.append(idPagoBitacora);
-		query.append(" AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado\r\n"
+		query.append(" AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado,\r\n"
+				+ "(\r\n"
+				+ "SELECT\r\n"
+				+ "CONCAT('\"',\r\n"
+				+ "DATE_FORMAT(FEC_PAGO, '");
+		query.append(formatoFecha);
+		query.append("')\r\n"
+				+ ",'\"')\r\n"
+				+ "FROM SVT_PAGO_DETALLE PD \r\n"
+				+ "WHERE \r\n"
+				+ "PD.ID_PAGO_BITACORA = ");
+		query.append(idPagoBitacora);
+		query.append(" AND PD.CVE_ESTATUS = '4'\r\n"
+				+ "ORDER BY FEC_PAGO DESC\r\n"
+				+ "LIMIT 1\r\n"
+				+ ") AS fechaUltimaPago\r\n"
 				+ "FROM SVT_PAGO_BITACORA PB\r\n"
 				+ "INNER JOIN SVC_ESTATUS_PAGO EOS ON EOS.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n"
 				+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
@@ -391,7 +409,7 @@ public class PagosUtil {
 		return query.toString();
 	}
 	
-	public String pagoDetalle(String idPagoBitacora){
+	public String pagoDetalle(String idPagoBitacora, String formatoFecha){
 		
 		StringBuilder query = new StringBuilder("SELECT\r\n"
 				+ "PD.ID_PAGO_DETALLE AS idPagoDetalle,\r\n"
@@ -400,7 +418,10 @@ public class PagosUtil {
 				+ "PD.IMP_PAGO AS importe,\r\n"
 				+ "PD.NUM_AUTORIZACION AS numAutorizacion,\r\n"
 				+ "PD.REF_BANCO AS nomBanco,\r\n"
-				+ "PD.FEC_PAGO AS fechaPago,\r\n"
+				+ "DATE_FORMAT(PD.FEC_PAGO, '");
+				query.append(formatoFecha);
+				query.append("')\r\n"
+				+ " AS fechaPago,\r\n"
 				+ "PD.FEC_VALE_AGF AS fechaValeParAGF,\r\n"
 				+ "PD.CVE_ESTATUS AS idEstatusPago,\r\n"
 				+ "EOS.DES_ESTATUS AS estatusPago\r\n"
