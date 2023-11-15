@@ -25,5 +25,8 @@ public class DetalleResponse {
 	private Double totalPorCubrir;
 	private String tipoPago;
 	private String fechaUltimaPago;
+	private String valeP;
+	private String nss;
+	private String generarPagare;
 	private List<Map<String, Object>> metodosPago;
 }
