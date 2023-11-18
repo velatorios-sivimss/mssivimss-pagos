@@ -27,6 +27,7 @@ public class DetalleResponse {
 	private String fechaUltimaPago;
 	private String valeP;
 	private String nss;
+	private String idFinado;
 	private String generarPagare;
 	private List<Map<String, Object>> metodosPago;
 }
