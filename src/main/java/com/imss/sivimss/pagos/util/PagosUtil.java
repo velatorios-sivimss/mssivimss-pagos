@@ -20,13 +20,15 @@ public class PagosUtil {
 			+ "PB.CVE_FOLIO AS folio,\r\n"
 			+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
 			+ "CAST(PB.IMP_VALOR AS double) AS total,\r\n"
+			+ "EP.DES_ESTATUS AS estatusPago,\r\n"
 			+ "IFNULL( (SELECT SUM(PD.IMP_PAGO)\r\n"
 			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
 			+ "WHERE \r\n"
 			+ "PD.ID_PAGO_BITACORA = idPagoBitacora "
 			+ "AND PD.CVE_ESTATUS = '4'), 0) AS totalPagado\r\n"
 			+ "FROM SVT_PAGO_BITACORA PB\r\n"
-			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n";
+			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
+			+ "INNER JOIN SVC_ESTATUS_PAGO EP ON EP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n";
 	
 	private static String CONSULTA_ODS = "SELECT \r\n"
 			+ "T.*,\r\n"
@@ -74,6 +76,7 @@ public class PagosUtil {
 			+ "WHERE\r\n"
 			+ "PB.ID_FLUJO_PAGOS = '1'\r\n"
 			+ "AND OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2,4)\r\n"
+			+ "AND PB.CVE_ESTATUS_PAGO IN (2,8)\r\n"
 			+ ") T"; 
 	
 	private static final String CONSULTA_TABLA = "SELECT T.*\r\n"
@@ -193,12 +196,14 @@ public class PagosUtil {
 				+ "WHERE\r\n"
 				+ "PB.ID_FLUJO_PAGOS = '2'\r\n"
 				+ "AND PF.ID_ESTATUS_CONVENIO IN (1,2) \r\n"
+				+ "AND PB.CVE_ESTATUS_PAGO IN (2,8)\r\n"
 				+ ") T";
 		break;
 		default:query = query + "INNER JOIN SVT_RENOVACION_CONVENIO_PF RPF ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO\r\n"
 				+ "WHERE\r\n"
 				+ "RPF.ID_ESTATUS IN (1,2) \r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '3'\r\n"
+				+ "AND PB.CVE_ESTATUS_PAGO IN (2,8)\r\n"
 				+ ") T";
 		}
 		
@@ -232,6 +237,7 @@ public class PagosUtil {
 				+ "WHERE\r\n"
 				+ "OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2,4)\r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '1' \r\n"
+				+ "AND PB.CVE_ESTATUS_PAGO IN (2,8)\r\n"
 				+ "ORDER BY OS.FEC_ALTA ASC";
 		return query;
 		
@@ -250,6 +256,7 @@ public class PagosUtil {
 				+ "WHERE\r\n"
 				+ "PF.ID_ESTATUS_CONVENIO IN (1,2)\r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '2' \r\n"
+				+ "AND PB.CVE_ESTATUS_PAGO IN (2,8)\r\n"
 				+ "ORDER BY PF.FEC_ALTA ASC";
 		return query;
 		
@@ -266,6 +273,7 @@ public class PagosUtil {
 				+ "WHERE\r\n"
 				+ "RPF.ID_ESTATUS IN (1,2)\r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '3' \r\n"
+				+ "AND PB.CVE_ESTATUS_PAGO IN (2,8)\r\n"
 				+ "ORDER BY RPF.FEC_ALTA ASC;";
 		return query;
 		
