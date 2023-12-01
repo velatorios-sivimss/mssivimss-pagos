@@ -81,7 +81,7 @@ public class PagosServiceImpl implements PagosService {
 	public Response<Object> consultaOds(DatosRequest request, Authentication authentication) throws IOException {
 		
 		PagosUtil pagosUtil = new PagosUtil();
-		String query = pagosUtil.tablaTotales(1);
+		String query = pagosUtil.tablaTotales(1, formatoFecha);
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
@@ -99,7 +99,7 @@ public class PagosServiceImpl implements PagosService {
 	public Response<Object> consultaPf(DatosRequest request, Authentication authentication) throws IOException {
 
 		PagosUtil pagosUtil = new PagosUtil();
-		String query = pagosUtil.tablaTotales(2);
+		String query = pagosUtil.tablaTotales(2, formatoFecha);
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
@@ -117,7 +117,7 @@ public class PagosServiceImpl implements PagosService {
 	public Response<Object> consultaRpf(DatosRequest request, Authentication authentication) throws IOException {
 
 		PagosUtil pagosUtil = new PagosUtil();
-		String query = pagosUtil.tablaTotales(3);
+		String query = pagosUtil.tablaTotales(3, formatoFecha);
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);

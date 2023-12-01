@@ -30,7 +30,7 @@ public class PagosUtil {
 			+ "INNER JOIN SVC_FLUJO_PAGOS FP ON FP.ID_FLUJO_PAGOS = PB.ID_FLUJO_PAGOS\r\n"
 			+ "INNER JOIN SVC_ESTATUS_PAGO EP ON EP.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO\r\n";
 	
-	private static String CONSULTA_ODS = "SELECT \r\n"
+	private static String CONSULTA_ODS_INI = "SELECT \r\n"
 			+ "T.*,\r\n"
 			+ "(T.total - T.totalPagado) AS diferenciasTotales\r\n"
 			+ "FROM \r\n"
@@ -38,7 +38,22 @@ public class PagosUtil {
 			+ "PB.ID_PAGO_BITACORA AS idPagoBitacora,\r\n"
 			+ "PB.ID_FLUJO_PAGOS AS idFlujoPago,\r\n"
 			+ "PB.ID_REGISTRO AS idRegistro,\r\n"
-			+ "PB.FEC_ODS AS fechaPago,\r\n"
+			+ "DATE_FORMAT(IFNULL(\r\n"
+			+ "	(\r\n"
+			+ "	SELECT\r\n"
+			+ "	PD.FEC_PAGO\r\n"
+			+ "	FROM\r\n"
+			+ "	SVT_PAGO_DETALLE PD\r\n"
+			+ "	INNER JOIN SVT_PAGO_BITACORA PB ON PB.ID_PAGO_BITACORA = PD.ID_PAGO_BITACORA\r\n"
+			+ "    WHERE\r\n"
+			+ "    PB.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+			+ "    ORDER BY PB.ID_PAGO_BITACORA DESC\r\n"
+			+ "    LIMIT 1\r\n"
+			+ "    ) , NOW() ), '";
+			
+			
+			
+	private static String CONSULTA_ODS_FIN = "') AS fechaPago,\r\n"
 			+ "PB.CVE_FOLIO AS folio,\r\n"
 			+ "FP.DESC_FLUJO_PAGOS AS tipoPago,\r\n"
 			+ "CAST(PB.IMP_VALOR AS double) AS total,\r\n"
@@ -184,12 +199,12 @@ public class PagosUtil {
 		return bol;
 	}
 	
-	public String tablaTotales(Integer idFlujo) {
+	public String tablaTotales(Integer idFlujo, String formatoFecha) {
 		
 		String query = CONSULTA_INI;
 		
 		switch(idFlujo) {
-		case 1: query = CONSULTA_ODS;
+		case 1: query = CONSULTA_ODS_INI + formatoFecha + CONSULTA_ODS_FIN;
 		break;
 		case 2: query = query + "INNER JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF =PB.ID_REGISTRO\r\n"
 				+ "INNER JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO\r\n"
