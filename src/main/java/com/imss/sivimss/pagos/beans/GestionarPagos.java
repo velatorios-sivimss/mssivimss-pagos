@@ -77,15 +77,14 @@ public class GestionarPagos {
     	DatosRequest request = new DatosRequest();
     	Map<String, Object> parametro = new HashMap<>();
     	
-    	StringBuilder query = new StringBuilder("SELECT RPF.ID_RENOVACION_CONVENIO_PF AS id, PF.DES_FOLIO AS folio \n");
-    	query.append("FROM SVT_RENOVACION_CONVENIO_PF RPF \n");
-    	query.append("JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF = RPF.ID_CONVENIO_PF \n");
-    	query.append("JOIN SVT_PAGO_BITACORA PB ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO \n");
-    	query.append("WHERE RPF.ID_ESTATUS IN (1,2) \n");
-    	query.append("AND PB.CVE_ESTATUS_PAGO IN (0, 2, 3, 4, 5) \n");
-    	query.append("AND PB.ID_FLUJO_PAGOS = '3' ");
+    	StringBuilder query = new StringBuilder("SELECT PB.ID_REGISTRO AS id,\r\n"
+    			+ "PB.CVE_FOLIO AS folio\r\n"
+    			+ "FROM SVT_RENOVACION_CONVENIO_PF RPF\r\n"
+    			+ "JOIN SVT_PAGO_BITACORA PB ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO \r\n"
+    			+ "WHERE RPF.ID_ESTATUS IN (1,2) \r\n"
+    			+ "AND PB.ID_FLUJO_PAGOS = '3'");
         if (busqueda.getIdVelatorio() != null) {
-        	query.append("AND PF.ID_VELATORIO = " + busqueda.getIdVelatorio());
+        	query.append("AND PB.ID_VELATORIO = " + busqueda.getIdVelatorio());
     	}
     	
         String encoded = DatatypeConverter.printBase64Binary(query.toString().getBytes("UTF-8"));
