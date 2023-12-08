@@ -12,7 +12,6 @@ import com.imss.sivimss.pagos.model.response.ModificaResponse;
 import com.imss.sivimss.pagos.util.AppConstantes;
 import com.imss.sivimss.pagos.util.DatosRequest;
 
-import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
@@ -82,7 +81,7 @@ public class GestionarPagos {
     	query.append("FROM SVT_RENOVACION_CONVENIO_PF RPF \n");
     	query.append("JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF = RPF.ID_CONVENIO_PF \n");
     	query.append("JOIN SVT_PAGO_BITACORA PB ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO \n");
-    	query.append("WHERE RPF.ID_ESTATUS = 1 \n");
+    	query.append("WHERE RPF.ID_ESTATUS IN (1,2) \n");
     	query.append("AND PB.CVE_ESTATUS_PAGO IN (0, 2, 3, 4, 5) \n");
     	query.append("AND PB.ID_FLUJO_PAGOS = '3' ");
         if (busqueda.getIdVelatorio() != null) {
@@ -200,17 +199,34 @@ public class GestionarPagos {
     	StringBuilder query = new StringBuilder();
     	switch (this.idFlujo) {
     	   case 1:
-    		   query.append("SELECT OS.ID_ORDEN_SERVICIO AS id, DATE_FORMAT(OS.FEC_ALTA,'" + formatoFecha + "') AS fecha, OS.CVE_FOLIO AS folio, ");
-    		   query.append("PB.NOM_CONTRATANTE AS nomContratante, 1 AS idFlujo, 'Pago de Orden de Servicio' AS desFlujo, DATE_FORMAT(PB.FEC_ALTA,'" + formatoFecha + "') AS fecPago, \n");
-    		   query.append("OS.ID_ESTATUS_ORDEN_SERVICIO AS idEstatus, EODS.DES_ESTATUS desEstatus, PB.CVE_ESTATUS_PAGO AS idEstatusPago, ");
-    		   query.append("EPAG.DES_ESTATUS desEstatusPago, PB.ID_PAGO_BITACORA AS idPagoBitacora, ");
-    		   query.append("PB.IMP_VALOR AS montoTotal \n");
-    		   query.append("FROM SVC_ORDEN_SERVICIO OS ");
-    		   query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO ");
-    		   query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EODS ON EODS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO ");
-    		   query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO \n");
-    		   query.append("WHERE OS.ID_ESTATUS_ORDEN_SERVICIO IN (0, 4) AND PB.CVE_ESTATUS_PAGO IN (4, 5) ");
-    		   query.append("AND OS.ID_ORDEN_SERVICIO = " + this.idPago);
+    		   query.append("SELECT \r\n"
+    		   		+ "OS.ID_ORDEN_SERVICIO AS id, \r\n"
+    		   		+ "DATE_FORMAT(OS.FEC_ALTA,'");
+    		   query.append(formatoFecha);
+    		   query.append("') AS fecha, \r\n"
+    		   		+ "OS.CVE_FOLIO AS folio, \r\n"
+    		   		+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
+    		   		+ "1 AS idFlujo, \r\n"
+    		   		+ "'Pago de Orden de Servicio' AS desFlujo, \r\n"
+    		   		+ "DATE_FORMAT(PB.FEC_ALTA,'");
+    		   query.append(formatoFecha);
+    		   query.append("') AS fecPago, \r\n"
+    		   		+ "OS.ID_ESTATUS_ORDEN_SERVICIO AS idEstatus, \r\n"
+    		   		+ "EODS.DES_ESTATUS desEstatus, \r\n"
+    		   		+ "PB.CVE_ESTATUS_PAGO AS idEstatusPago, \r\n"
+    		   		+ "EPAG.DES_ESTATUS desEstatusPago, \r\n"
+    		   		+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
+    		   		+ "PB.IMP_VALOR AS montoTotal \r\n"
+    		   		+ "FROM \r\n"
+    		   		+ "SVC_ORDEN_SERVICIO OS \r\n"
+    		   		+ "JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO \r\n"
+    		   		+ "JOIN SVC_ESTATUS_ORDEN_SERVICIO EODS ON EODS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO \r\n"
+    		   		+ "JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO \r\n"
+    		   		+ "WHERE \r\n"
+    		   		+ "OS.ID_ESTATUS_ORDEN_SERVICIO IN (0, 4) \r\n"
+    		   		+ "AND PB.CVE_ESTATUS_PAGO IN (4, 5) \r\n"
+    		   		+ "AND OS.ID_ORDEN_SERVICIO = ");
+    		   query.append(this.idPago);
     		   query.append(" AND PB.ID_FLUJO_PAGOS = '1' ");
     		   break;
     	   case 2:
