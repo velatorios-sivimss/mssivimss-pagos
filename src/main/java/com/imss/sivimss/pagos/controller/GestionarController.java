@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.imss.sivimss.pagos.util.DatosRequest;
 import com.imss.sivimss.pagos.util.Response;
 import com.imss.sivimss.pagos.service.GestionarService;
-import com.imss.sivimss.pagos.service.PagosService;
-import com.imss.sivimss.pagos.util.LogUtil;
 import com.imss.sivimss.pagos.util.ProviderServiceRestTemplate;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
