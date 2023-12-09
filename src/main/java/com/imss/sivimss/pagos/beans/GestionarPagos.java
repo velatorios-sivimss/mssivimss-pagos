@@ -403,83 +403,157 @@ public class GestionarPagos {
 	}
     
     private StringBuilder consultaOds() {
-    	StringBuilder query = new StringBuilder("SELECT OS.ID_ORDEN_SERVICIO AS id, DATE_FORMAT(OS.FEC_ALTA,'" + formatoFecLocal + "') AS fecha, OS.CVE_FOLIO AS folio, ");
-    	query.append("PB.NOM_CONTRATANTE AS nomContratante, 1 AS idFlujo, 'Pago de Orden de Servicio' AS desFlujo, ");
-    	query.append("SUM(PD.IMP_PAGO) AS total, OS.ID_ESTATUS_ORDEN_SERVICIO AS idEstatus, ");
-    	query.append("EODS.DES_ESTATUS desEstatus, PB.ID_PAGO_BITACORA AS idPagoBitacora, ");
-    	query.append("PB.CVE_ESTATUS_PAGO AS idEstatusPago, EPAG.DES_ESTATUS desEstatusPago, \n");
-    	query.append("(SELECT GROUP_CONCAT( MP.DES_METODO_PAGO SEPARATOR ', ' ) FROM SVC_METODO_PAGO MP ");
-    	query.append(" INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO ");
-    	query.append(" WHERE PD.ID_PAGO_BITACORA = idPagoBitacora) AS metodosPago, \n");
-    	query.append("CASE WHEN OS.ID_ESTATUS_ORDEN_SERVICIO = 2 THEN 1 "
-    		       + "     WHEN PB.CVE_ESTATUS_PAGO = 2 THEN 1  ELSE 0 "
-    			   + "END AS soloVisual \n");
-    	query.append("FROM SVC_ORDEN_SERVICIO OS ");
-    	query.append("JOIN SVC_VELATORIO VEL ON VEL.ID_VELATORIO = OS.ID_VELATORIO ");
-    	query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO ");
-    	query.append("JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA ");
-    	query.append("JOIN SVC_ESTATUS_ORDEN_SERVICIO EODS ON EODS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO ");
-    	query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO ");
-    	query.append("WHERE OS.ID_ESTATUS_ORDEN_SERVICIO IN (0, 2, 4) ");
-    	query.append("AND PB.CVE_ESTATUS_PAGO IN (2, 4, 5) ");
-    	query.append("AND PB.ID_FLUJO_PAGOS = '1' \n");
+    	StringBuilder query = new StringBuilder("SELECT \r\n"
+    			+ "OS.ID_ORDEN_SERVICIO AS id, \r\n"
+    			+ "DATE_FORMAT(OS.FEC_ALTA,'" + formatoFecLocal);
+    	query.append("') AS fecha, \r\n"
+    			+ "OS.CVE_FOLIO AS folio, \r\n"
+    			+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
+    			+ "1 AS idFlujo, \r\n"
+    			+ "'Pago de Orden de Servicio' AS desFlujo, \r\n"
+    			+ "PB.ID_PAGO_BITACORA AS idPagoBitacora,\r\n"
+    			+ "IFNULL( (SELECT SUM(PD.IMP_PAGO)\r\n"
+    			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
+    			+ "WHERE\r\n"
+    			+ "PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+    			+ "AND PD.CVE_ESTATUS = '4'), 0) AS total, \r\n"
+    			+ "OS.ID_ESTATUS_ORDEN_SERVICIO AS idEstatus, \r\n"
+    			+ "EODS.DES_ESTATUS desEstatus, \r\n"
+    			+ " \r\n"
+    			+ "PB.CVE_ESTATUS_PAGO AS idEstatusPago, \r\n"
+    			+ "EPAG.DES_ESTATUS desEstatusPago, \r\n"
+    			+ "(\r\n"
+    			+ "SELECT \r\n"
+    			+ "GROUP_CONCAT( MP.DES_METODO_PAGO SEPARATOR ', ' ) \r\n"
+    			+ "FROM SVC_METODO_PAGO MP  \r\n"
+    			+ "INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO  \r\n"
+    			+ "WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+    			+ "AND PD.CVE_ESTATUS = '4'\r\n"
+    			+ ") AS metodosPago, \r\n"
+    			+ "CASE \r\n"
+    			+ "	WHEN OS.ID_ESTATUS_ORDEN_SERVICIO = 2 \r\n"
+    			+ "		THEN 1\r\n"
+    			+ "	WHEN PB.CVE_ESTATUS_PAGO = 2 \r\n"
+    			+ "		THEN 1  \r\n"
+    			+ "	ELSE 0 \r\n"
+    			+ "END AS soloVisual \r\n"
+    			+ "FROM \r\n"
+    			+ "SVC_ORDEN_SERVICIO OS\r\n"
+    			+ "JOIN SVC_VELATORIO VEL ON VEL.ID_VELATORIO = OS.ID_VELATORIO \r\n"
+    			+ "JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO \r\n"
+    			+ "JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA \r\n"
+    			+ "JOIN SVC_ESTATUS_ORDEN_SERVICIO EODS ON EODS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO \r\n"
+    			+ "JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO \r\n"
+    			+ "WHERE \r\n"
+    			+ "OS.ID_ESTATUS_ORDEN_SERVICIO IN (0, 2, 4)\r\n"
+    			+ "AND PB.ID_FLUJO_PAGOS = '1' ");
     	
     	return query;
     }
     
     private StringBuilder consultaPf() {
-    	StringBuilder query = new StringBuilder("SELECT PF.ID_CONVENIO_PF AS id, DATE_FORMAT(PF.FEC_ALTA,'" + formatoFecLocal + "') AS fecha, PF.DES_FOLIO AS folio, ");
-    	query.append("PB.NOM_CONTRATANTE AS nomContratante, 2 AS idFlujo, 'Pago de Prevision Funeraria' AS desFlujo, ");
-    	query.append("SUM(PD.IMP_PAGO) AS total, PF.ID_ESTATUS_CONVENIO AS idEstatus, ");
-    	query.append("ECPF.DES_ESTATUS desEstatus, PB.ID_PAGO_BITACORA AS idPagoBitacora, ");
-    	query.append("PB.CVE_ESTATUS_PAGO AS idEstatusPago, EPAG.DES_ESTATUS desEstatusPago, \n");
-    	query.append("(SELECT GROUP_CONCAT( MP.DES_METODO_PAGO SEPARATOR ', ' ) FROM SVC_METODO_PAGO MP ");
-    	query.append(" INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO ");
-    	query.append(" WHERE PD.ID_PAGO_BITACORA = idPagoBitacora) AS metodosPago, \n");
-    	query.append("CASE WHEN PF.ID_ESTATUS_CONVENIO = 3 THEN 1 "
-    			   + "     WHEN PF.ID_ESTATUS_CONVENIO = 4 THEN 1 "
-    			   + "	   WHEN PB.CVE_ESTATUS_PAGO = 2 THEN 1 "
-    			   + "	   WHEN PB.CVE_ESTATUS_PAGO = 3 THEN 1 "
-    			   + "	   ELSE 0 "
-    			   + "END AS soloVisual \n");
-    	query.append("FROM SVT_CONVENIO_PF PF ");
-    	query.append("JOIN SVC_VELATORIO VEL ON VEL.ID_VELATORIO = PF.ID_VELATORIO ");
-    	query.append("JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = PF.ID_CONVENIO_PF ");
-    	query.append("JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA ");
-    	query.append("JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO ");
-    	query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO ");
-    	query.append("JOIN SVC_METODO_PAGO MET ON MET.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
-    	query.append("WHERE PB.CVE_ESTATUS_PAGO IN (0, 2, 3, 4, 5) ");
-    	query.append("AND PB.ID_FLUJO_PAGOS = '2' \n");
+    	StringBuilder query = new StringBuilder("SELECT \r\n"
+    			+ "PF.ID_CONVENIO_PF AS id, \r\n"
+    			+ "DATE_FORMAT(PF.FEC_ALTA,'" + formatoFecLocal);
+    	query.append("') AS fecha, \r\n"
+    			+ "PF.DES_FOLIO AS folio, \r\n"
+    			+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
+    			+ "2 AS idFlujo, \r\n"
+    			+ "'Pago de Prevision Funeraria' AS desFlujo, \r\n"
+    			+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
+    			+ "IFNULL( (SELECT SUM(PD.IMP_PAGO)\r\n"
+    			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
+    			+ "WHERE\r\n"
+    			+ "PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+    			+ "AND PD.CVE_ESTATUS = '4'), 0) AS total, \r\n"
+    			+ "PF.ID_ESTATUS_CONVENIO AS idEstatus, \r\n"
+    			+ "ECPF.DES_ESTATUS desEstatus, \r\n"
+    			+ "PB.CVE_ESTATUS_PAGO AS idEstatusPago, \r\n"
+    			+ "EPAG.DES_ESTATUS desEstatusPago, \r\n"
+    			+ "(\r\n"
+    			+ "SELECT \r\n"
+    			+ "	GROUP_CONCAT( MP.DES_METODO_PAGO SEPARATOR ', ' )\r\n"
+    			+ "		FROM \r\n"
+    			+ "		SVC_METODO_PAGO MP  \r\n"
+    			+ "		INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO  \r\n"
+    			+ "		WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+    			+ "		AND PD.CVE_ESTATUS = '4'\r\n"
+    			+ ") AS metodosPago, \r\n"
+    			+ "CASE \r\n"
+    			+ "	WHEN PF.ID_ESTATUS_CONVENIO = 3 \r\n"
+    			+ "		THEN 1      \r\n"
+    			+ "	WHEN PF.ID_ESTATUS_CONVENIO = 4 \r\n"
+    			+ "		THEN 1 	   \r\n"
+    			+ "	WHEN PB.CVE_ESTATUS_PAGO = 2 \r\n"
+    			+ "		THEN 1 	   \r\n"
+    			+ "	WHEN PB.CVE_ESTATUS_PAGO = 3 \r\n"
+    			+ "		THEN 1 	   \r\n"
+    			+ "	ELSE 0 \r\n"
+    			+ "END AS soloVisual \r\n"
+    			+ "FROM \r\n"
+    			+ "SVT_CONVENIO_PF PF \r\n"
+    			+ "JOIN SVC_VELATORIO VEL ON VEL.ID_VELATORIO = PF.ID_VELATORIO \r\n"
+    			+ "JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = PF.ID_CONVENIO_PF \r\n"
+    			+ "JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA \r\n"
+    			+ "JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO \r\n"
+    			+ "JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO \r\n"
+    			+ "JOIN SVC_METODO_PAGO MET ON MET.ID_METODO_PAGO = PD.ID_METODO_PAGO \r\n"
+    			+ "WHERE \r\n"
+    			+ "PF.ID_ESTATUS_CONVENIO IN (1,2) \r\n"
+    			+ "AND PB.ID_FLUJO_PAGOS = '2' ");
     	
     	return query;
     }
     
     private StringBuilder consultaRpf() {
-    	StringBuilder query = new StringBuilder("SELECT RPF.ID_RENOVACION_CONVENIO_PF AS id, DATE_FORMAT(RPF.FEC_ALTA,'" + formatoFecLocal + "') AS fecha, RPF.REF_FOLIO_ADENDA AS folio, ");
-    	query.append("PB.NOM_CONTRATANTE AS nomContratante, 3 AS idFlujo,'Pago de Renovacion Previsión Funeraria' AS desFlujo, ");
-    	query.append("SUM(PD.IMP_PAGO) AS total, PF.ID_ESTATUS_CONVENIO AS idEstatus,  ");
-    	query.append("ECPF.DES_ESTATUS desEstatus, PB.ID_PAGO_BITACORA AS idPagoBitacora, ");
-    	query.append("PB.CVE_ESTATUS_PAGO AS idEstatusPago, EPAG.DES_ESTATUS desEstatusPago, \n");
-    	query.append("(SELECT GROUP_CONCAT( MP.DES_METODO_PAGO SEPARATOR ', ' ) FROM SVC_METODO_PAGO MP ");
-    	query.append(" INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO ");
-    	query.append(" WHERE PD.ID_PAGO_BITACORA = idPagoBitacora) AS metodosPago, \n");
-    	query.append("CASE WHEN PF.IND_RENOVACION = 0 THEN 1 "
-    			   + "	   WHEN PB.CVE_ESTATUS_PAGO = 2 THEN 1 "
-    		       + "	   WHEN PB.CVE_ESTATUS_PAGO = 3 THEN 1 "
-    			   + "     ELSE 0 "
-    			   + "END AS soloVisual \n");
-    	query.append("FROM SVT_RENOVACION_CONVENIO_PF RPF ");
-    	query.append("JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF = RPF.ID_CONVENIO_PF ");
-    	query.append("JOIN SVC_VELATORIO VEL ON VEL.ID_VELATORIO = PF.ID_VELATORIO ");
-    	query.append("JOIN SVT_PAGO_BITACORA PB ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO ");
-    	query.append("JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA ");
-    	query.append("JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO ");
-    	query.append("JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO ");
-    	query.append("JOIN SVC_METODO_PAGO MET ON MET.ID_METODO_PAGO = PD.ID_METODO_PAGO \n");
-    	query.append("WHERE RPF.ID_ESTATUS = 1 ");
-    	query.append("AND PB.CVE_ESTATUS_PAGO IN (2, 3, 4, 5) ");
-    	query.append("AND PB.ID_FLUJO_PAGOS = '3' \n");
+    	StringBuilder query = new StringBuilder("SELECT \r\n"
+    			+ "RPF.ID_RENOVACION_CONVENIO_PF AS id,\r\n"
+    			+ "DATE_FORMAT(RPF.FEC_ALTA,'" + formatoFecLocal);
+    	query.append("') AS fecha, \r\n"
+    			+ "RPF.REF_FOLIO_ADENDA AS folio, \r\n"
+    			+ "PB.NOM_CONTRATANTE AS nomContratante, \r\n"
+    			+ "3 AS idFlujo,\r\n"
+    			+ "'Pago de Renovacion Previsión Funeraria' AS desFlujo, \r\n"
+    			+ "PB.ID_PAGO_BITACORA AS idPagoBitacora, \r\n"
+    			+ "IFNULL( (SELECT SUM(PD.IMP_PAGO)\r\n"
+    			+ "FROM  SVT_PAGO_DETALLE PD \r\n"
+    			+ "WHERE\r\n"
+    			+ "PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+    			+ "AND PD.CVE_ESTATUS = '4'), 0) AS total, \r\n"
+    			+ "PF.ID_ESTATUS_CONVENIO AS idEstatus, \r\n"
+    			+ "ECPF.DES_ESTATUS desEstatus, \r\n"
+    			+ "PB.CVE_ESTATUS_PAGO AS idEstatusPago, \r\n"
+    			+ "EPAG.DES_ESTATUS desEstatusPago, \r\n"
+    			+ "( \r\n"
+    			+ "SELECT \r\n"
+    			+ "	GROUP_CONCAT( MP.DES_METODO_PAGO SEPARATOR ', ' )\r\n"
+    			+ "		FROM \r\n"
+    			+ "		SVC_METODO_PAGO MP  \r\n"
+    			+ "		INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_METODO_PAGO = MP.ID_METODO_PAGO  \r\n"
+    			+ "		WHERE PD.ID_PAGO_BITACORA = idPagoBitacora\r\n"
+    			+ "		AND PD.CVE_ESTATUS = '4'\r\n"
+    			+ ") AS metodosPago,\r\n"
+    			+ "CASE \r\n"
+    			+ "	WHEN PF.IND_RENOVACION = 0 \r\n"
+    			+ "		THEN 1 	   \r\n"
+    			+ "	WHEN PB.CVE_ESTATUS_PAGO = 2 \r\n"
+    			+ "		THEN 1 	   \r\n"
+    			+ "	WHEN PB.CVE_ESTATUS_PAGO = 3 \r\n"
+    			+ "		THEN 1      \r\n"
+    			+ "	ELSE 0 \r\n"
+    			+ "END AS soloVisual \r\n"
+    			+ "FROM \r\n"
+    			+ "SVT_RENOVACION_CONVENIO_PF RPF \r\n"
+    			+ "JOIN SVT_CONVENIO_PF PF ON PF.ID_CONVENIO_PF = RPF.ID_CONVENIO_PF \r\n"
+    			+ "JOIN SVC_VELATORIO VEL ON VEL.ID_VELATORIO = PF.ID_VELATORIO \r\n"
+    			+ "JOIN SVT_PAGO_BITACORA PB ON RPF.ID_RENOVACION_CONVENIO_PF = PB.ID_REGISTRO \r\n"
+    			+ "JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA \r\n"
+    			+ "JOIN SVC_ESTATUS_CONVENIO_PF ECPF ON ECPF.ID_ESTATUS_CONVENIO_PF = PF.ID_ESTATUS_CONVENIO \r\n"
+    			+ "JOIN SVC_ESTATUS_PAGO EPAG ON EPAG.ID_ESTATUS_PAGO = PB.CVE_ESTATUS_PAGO \r\n"
+    			+ "JOIN SVC_METODO_PAGO MET ON MET.ID_METODO_PAGO = PD.ID_METODO_PAGO \r\n"
+    			+ "WHERE \r\n"
+    			+ "RPF.ID_ESTATUS IN (1,2) \r\n"
+    			+ "AND PB.ID_FLUJO_PAGOS = '3' ");
     	
     	return query;
     }
