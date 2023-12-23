@@ -7,7 +7,8 @@ public class AppConstantes {
 	public static final String ORDER_BY= "id";
 	public static final String ORDER_DIRECTION= "asc";
 	public static final String SUPERVISOR = "Supervisor";
-	
+
+	public static final String EXITO= "Exito";
 	public static final String DATOS= "datos";
 	public static final String QUERY= "query";
 	public static final String STATUSEXCEPTION = "status";

@@ -22,4 +22,6 @@ public interface PagosService {
 	Response<Object> actualizar(DatosRequest request, Authentication authentication) throws IOException;
 	Response<Object> eliminarTodos(DatosRequest request, Authentication authentication) throws IOException;
 	Response<Object> generartablaPDF(DatosRequest request, Authentication authentication) throws IOException;
+	
+	Response<Object> validarAGF(DatosRequest request, Authentication authentication) throws IOException;
 }

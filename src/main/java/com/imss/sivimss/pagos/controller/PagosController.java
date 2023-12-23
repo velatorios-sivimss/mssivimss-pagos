@@ -175,6 +175,20 @@ public class PagosController {
       
 	}
 	
+
+
+	@CircuitBreaker(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@Retry(name = "msflujo", fallbackMethod = "fallbackGenerico")
+	@TimeLimiter(name = "msflujo")
+	@PostMapping("/consulta/validaAGF")
+	public CompletableFuture<Object> validarAGF(@RequestBody DatosRequest request, Authentication authentication) throws IOException {
+		
+		Response<?> response = pagosService.validarAGF(request, authentication);
+		return CompletableFuture
+				.supplyAsync(() -> new ResponseEntity<>(response, HttpStatus.valueOf(response.getCodigo())));
+	}
+	
+	
 	/**
 	 * fallbacks generico
 	 * 

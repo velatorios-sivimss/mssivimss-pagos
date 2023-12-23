@@ -1,10 +1,14 @@
 package com.imss.sivimss.pagos.beans;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.DatatypeConverter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.imss.sivimss.pagos.model.request.BusquedaDto;
 import com.imss.sivimss.pagos.model.response.CancelaResponse;
@@ -26,6 +30,8 @@ public class GestionarPagos {
 	private static final String FOLIO_INEXISTENTE = "'XXXXXXXXXXXX'";
 	
 	private String formatoFecLocal;
+
+	private static final Logger log = LoggerFactory.getLogger(GestionarPagos.class);
 	
 	public GestionarPagos(Integer idFlujo, Integer idPago) {
 		this.idFlujo = idFlujo;
@@ -571,6 +577,36 @@ public class GestionarPagos {
     private String groupByRpf() {
     	return " GROUP BY RPF.ID_RENOVACION_CONVENIO_PF, RPF.FEC_ALTA, RPF.REF_FOLIO_ADENDA, PB.NOM_CONTRATANTE, "
     	     + "PF.ID_ESTATUS_CONVENIO, PB.CVE_ESTATUS_PAGO ";
+    }
+
+    public  DatosRequest queryUsoAGF(int idODS) {
+    	DatosRequest request = new DatosRequest();
+    	Map<String, Object> parametro = new HashMap<>();
+    	String query="SELECT CASE WHEN COUNT( PD.ID_PAGO_DETALLE ) >= 1 THEN 0 -- 0 exiten mas de 1 y no puede usarse la ODS \r\n"
+    			+ " ELSE 1 -- 1 no existe uso de AGF y puede usarse la ODS \r\n"
+    			+ " END AS agf  "
+    			+ " FROM SVT_PAGO_BITACORA PB INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA "
+    			+ " WHERE PD.ID_METODO_PAGO = 2 AND PD.CVE_ESTATUS = 4 AND PB.ID_FLUJO_PAGOS = 1 AND PB.ID_REGISTRO = " + idODS;
+    	log.info(query); 
+        String encoded = DatatypeConverter.printBase64Binary(query.getBytes(StandardCharsets.UTF_8));
+		parametro.put(AppConstantes.QUERY, encoded);
+		request.setDatos(parametro);
+		return request;
+    }
+
+    public  DatosRequest queryObtenerNSS(int idODS) {
+    	DatosRequest request = new DatosRequest();
+    	Map<String, Object> parametro = new HashMap<>();
+    	String query="SELECT FIN.ID_FINADO AS idFinado, PER.CVE_NSS AS nss FROM SVC_FINADO FIN "
+    			+ " JOIN SVC_ORDEN_SERVICIO OS ON OS.ID_ORDEN_SERVICIO = FIN.ID_ORDEN_SERVICIO "
+    			+ " JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO "
+    			+ " JOIN SVC_PERSONA PER ON PER.ID_PERSONA = FIN.ID_PERSONA "
+    			+ " WHERE PB.ID_FLUJO_PAGOS = 1 AND OS.ID_ORDEN_SERVICIO = " + idODS;
+    	log.info(query); 
+        String encoded = DatatypeConverter.printBase64Binary(query.getBytes(StandardCharsets.UTF_8));
+		parametro.put(AppConstantes.QUERY, encoded);
+		request.setDatos(parametro);
+		return request;
     }
     
 }
