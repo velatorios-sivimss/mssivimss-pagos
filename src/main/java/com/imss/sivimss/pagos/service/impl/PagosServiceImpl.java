@@ -3,6 +3,7 @@ package com.imss.sivimss.pagos.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -25,7 +26,9 @@ import com.imss.sivimss.pagos.util.MensajeResponseUtil;
 import com.imss.sivimss.pagos.util.ProviderServiceRestTemplate;
 import com.imss.sivimss.pagos.util.LogUtil;
 import com.imss.sivimss.pagos.util.PagosUtil;
+import com.imss.sivimss.pagos.beans.GestionarPagos;
 import com.imss.sivimss.pagos.model.request.ActualizarMultiRequest;
+import com.imss.sivimss.pagos.model.request.AgfDto;
 import com.imss.sivimss.pagos.model.request.CrearRequest;
 import com.imss.sivimss.pagos.model.request.FiltroRequest;
 import com.imss.sivimss.pagos.util.AppConstantes;
@@ -33,6 +36,9 @@ import com.imss.sivimss.pagos.util.AppConstantes;
 @Service
 public class PagosServiceImpl implements PagosService {
 
+	@Value("${endpoints.nss}")
+	private String urlnss;
+	
 	@Value("${endpoints.dominio}")
 	private String urlDomino;
 	
@@ -424,5 +430,81 @@ public class PagosServiceImpl implements PagosService {
 		return MensajeResponseUtil.mensajeConsultaResponse(providerRestTemplate.consumirServicioReportes(envioDatos, urlReportes,authentication)
 				, ERROR_AL_DESCARGAR_DOCUMENTO);
 	}
+	
+	
+	public Response<Object> validarAGF(DatosRequest request, Authentication authentication) throws IOException {
 
+		try {
+		Gson gson = new Gson();		
+		String datosJson = String.valueOf(request.getDatos().get(AppConstantes.DATOS));
+		AgfDto agfDto = gson.fromJson(datosJson, AgfDto.class);
+		agfUtilizado(agfDto, authentication);
+		if( agfDto.getAgf() == 0) {
+			return new Response<>(false, 200, AppConstantes.EXITO, agfDto);		 
+		}
+		agfDto.setAgf(1);
+		obtenerNSS(agfDto, authentication);
+		if( agfDto.getNss() == null || agfDto.getNss().equals("")) {
+			agfDto.setAgf(0);
+			return new Response<>(false, 200, AppConstantes.EXITO, agfDto);		 
+		}
+		validaNSS(agfDto, authentication);
+		return new Response<>(false, 200, AppConstantes.EXITO, agfDto);	
+		} catch (Exception e) {
+        	logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), CONSULTA, authentication);
+			return null;
+        }
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private AgfDto agfUtilizado(AgfDto agfDto, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+		GestionarPagos gestionPagos = new GestionarPagos();
+		try {
+			Response<Object> response = null;
+		    response = providerRestTemplate.consumirServicio(gestionPagos.queryUsoAGF(agfDto.getIdODS()).getDatos(), urlDomino + CONSULTA_GENERICA, authentication);
+			ArrayList<LinkedHashMap> datos = (ArrayList<LinkedHashMap>) response.getDatos();
+		    AgfDto busqueda = gson.fromJson(datos.get(0).toString(), AgfDto.class);
+		    agfDto.setAgf(busqueda.getAgf());
+		    
+		    return agfDto;
+		} catch (Exception e) {
+        	logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), CONSULTA, authentication);
+			return agfDto;
+        }
+	}
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private AgfDto obtenerNSS(AgfDto agfDto, Authentication authentication) throws IOException {
+		Gson gson = new Gson();
+		GestionarPagos gestionPagos = new GestionarPagos();
+		try {
+			Response<Object> response = null;
+		    response = providerRestTemplate.consumirServicio(gestionPagos.queryObtenerNSS(agfDto.getIdODS()).getDatos(), urlDomino + CONSULTA_GENERICA, authentication);
+			ArrayList<LinkedHashMap> datos = (ArrayList<LinkedHashMap>) response.getDatos();
+		    AgfDto busqueda = gson.fromJson(datos.get(0).toString(), AgfDto.class);
+		    agfDto.setIdFinado(busqueda.getIdFinado());
+		    agfDto.setNss(busqueda.getNss());
+		    return agfDto;
+		} catch (Exception e) {
+        	logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), CONSULTA, authentication);
+			return agfDto;
+        }
+	}
+
+	private AgfDto validaNSS(AgfDto agfDto, Authentication authentication) throws IOException {
+		try {
+			Response<Object>response=providerRestTemplate.consumirServicioExternoGet(urlnss+"/"+agfDto.getNss());
+			if(response.getDatos() == null) {
+				agfDto.setAgf(0);
+				agfDto.setNss(null);
+				agfDto.setIdFinado(null);
+			}else
+				agfDto.setAgf(1);
+			
+		    return agfDto;
+		} catch (Exception e) {
+        	logUtil.crearArchivoLog(Level.SEVERE.toString(), this.getClass().getSimpleName(), this.getClass().getPackage().toString(), e.getMessage(), CONSULTA, authentication);
+			return agfDto;
+        }
+	}
 }

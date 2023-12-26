@@ -135,4 +135,9 @@ public class ProviderServiceRestTemplate {
 		 return MensajeResponseUtil.mensajeResponse(response, "");
 	}
 
+
+	public Response<Object> consumirServicioExternoGet(String url) {
+		return restTemplateUtil.sendGetRequest(url);
+	}
+	
 }
