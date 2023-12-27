@@ -663,4 +663,31 @@ public class PagosUtil {
 		query.append( " LIMIT 1 ");
 		return query.toString();
 	}
+	
+	public String tipoPagoDetalle(Integer idOds){
+		
+		StringBuilder query = new StringBuilder();
+		
+		query.append(" SELECT COUNT( PD.ID_PAGO_DETALLE ) AS valeP ")
+		.append(" FROM SVT_PAGO_BITACORA PB  INNER JOIN SVT_PAGO_DETALLE PD ")
+		.append(" ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA ")
+		.append(" WHERE IFNULL(PB.ID_PAGO_BITACORA,0) > 0 ")
+		.append(" AND PD.ID_METODO_PAGO = 1 AND PD.CVE_ESTATUS = 4 ")
+		.append(" AND PB.ID_FLUJO_PAGOS = 1 AND PB.ID_REGISTRO =  ").append(idOds);
+		
+		return query.toString();
+	}
+	
+	public String obtenerMatricula(Integer idOds){
+		
+		StringBuilder query = new StringBuilder();
+		
+		query.append(" SELECT IFNULL(CON.CVE_MATRICULA,'')  AS cveMatricula ")
+		.append(" FROM SVC_ORDEN_SERVICIO OS INNER JOIN SVC_CONTRATANTE CON ")
+		.append(" ON CON.ID_CONTRATANTE = OS.ID_CONTRATANTE ")
+		.append(" WHERE IFNULL(OS.ID_ORDEN_SERVICIO ,0) > 0 ")
+		.append(" AND OS.ID_ORDEN_SERVICIO =  ").append(idOds);
+		
+		return query.toString();
+	}
 }

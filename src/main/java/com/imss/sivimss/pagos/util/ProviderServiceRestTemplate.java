@@ -27,6 +27,8 @@ public class ProviderServiceRestTemplate {
 	private JwtTokenProvider jwtTokenProvider;
 
 	private static final Logger log = LoggerFactory.getLogger(ProviderServiceRestTemplate.class);
+	
+	private static final String MENSAJE = "Ha ocurrido un error al recuperar la informacion";
 
 	public Response<Object> consumirServicio(Map<String, Object> dato, String url, Authentication authentication)
 			throws IOException {
@@ -36,7 +38,7 @@ public class ProviderServiceRestTemplate {
 					Response.class);
 			return validarResponse(respuestaGenerado);
 		} catch (IOException exception) {
-			log.error("Ha ocurrido un error al recuperar la informacion");
+			log.error(MENSAJE);
 			throw exception;
 		}
 	}
@@ -63,7 +65,7 @@ public class ProviderServiceRestTemplate {
 					jwtTokenProvider.createToken((String) authentication.getPrincipal()), Response.class);
 			return validarResponse(respuestaGenerado);
 		} catch (IOException exception) {
-			log.error("Ha ocurrido un error al recuperar la informacion");
+			log.error(MENSAJE);
 			throw exception;
 		}
 	}
@@ -81,6 +83,16 @@ public class ProviderServiceRestTemplate {
 
 		}
 		return respuestaGenerado;
+	}
+	
+	public Map<String, Object> consumirServicioGet(String url) throws IOException {
+		try {
+			Map<String, Object> respuestaGenerado=restTemplateUtil.sendGet(url, Map.class);
+			return respuestaGenerado;
+		} catch (IOException exception) {
+			log.error(MENSAJE);
+			throw exception;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
