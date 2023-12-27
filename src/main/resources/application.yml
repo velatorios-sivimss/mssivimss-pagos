@@ -27,6 +27,7 @@ endpoints:
    dominio: ${msit_CATALOGOS}
    ms-reportes: ${msit_REPORTES_GENERALES}
    nss: ${msit_NSS}
+   consulta-siap: ${msit_SIAP}/
    
 modulo:
    reporte-detalle-pago: reportes/modulo/ReporteDetallePago.jrxml
