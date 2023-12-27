@@ -555,7 +555,7 @@ public class PagosServiceImpl implements PagosService {
 						
 						List<ContratanteRequest> contratante = Arrays.asList(modelMapper.map(response.getDatos(), ContratanteRequest[].class));
 						
-						if( contratante.get(0).getCveMatricula() == null && Objects.equals(contratante.get(0).getCveMatricula(), AppConstantes.EMPTY_STRING)) {
+						if( contratante.get(0).getCveMatricula() == null || Objects.equals(contratante.get(0).getCveMatricula(), AppConstantes.EMPTY_STRING)) {
 							
 							 response= new Response<>(false, 200, AppConstantes.EXITO,  new ValeParitariaResponse(0));
 							
