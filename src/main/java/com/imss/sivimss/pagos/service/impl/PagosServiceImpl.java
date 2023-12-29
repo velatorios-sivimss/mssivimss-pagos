@@ -96,9 +96,11 @@ public class PagosServiceImpl implements PagosService {
 
 	@Override
 	public Response<Object> consultaOds(DatosRequest request, Authentication authentication) throws IOException {
-		
+
+		Gson gson = new Gson();
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
 		PagosUtil pagosUtil = new PagosUtil();
-		String query = pagosUtil.tablaTotales(1, formatoFecha);
+		String query = pagosUtil.tablaTotales(1, formatoFecha, crearRequest.getIdVelatorio());
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
@@ -114,9 +116,11 @@ public class PagosServiceImpl implements PagosService {
 
 	@Override
 	public Response<Object> consultaPf(DatosRequest request, Authentication authentication) throws IOException {
-
+		Gson gson = new Gson();
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
+		
 		PagosUtil pagosUtil = new PagosUtil();
-		String query = pagosUtil.tablaTotales(2, formatoFecha);
+		String query = pagosUtil.tablaTotales(2, formatoFecha, crearRequest.getIdVelatorio());
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
@@ -132,9 +136,11 @@ public class PagosServiceImpl implements PagosService {
 
 	@Override
 	public Response<Object> consultaRpf(DatosRequest request, Authentication authentication) throws IOException {
-
+		Gson gson = new Gson();
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
+		
 		PagosUtil pagosUtil = new PagosUtil();
-		String query = pagosUtil.tablaTotales(3, formatoFecha);
+		String query = pagosUtil.tablaTotales(3, formatoFecha, crearRequest.getIdVelatorio());
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
