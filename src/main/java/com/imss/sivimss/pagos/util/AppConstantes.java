@@ -28,6 +28,16 @@ public class AppConstantes {
 	public static final String CIRCUITBREAKER = "186"; //El servicio no responde, no permite más llamadas.
 	public static final String OCURRIO_ERROR_GENERICO="187";// Ocurrio un error al procesar tu solicitud.
 	
+	public static final String ERROR_AL_EJECUTAR_EL_QUERY = "Error al ejecutar el query ";
+	public static final String FALLO_AL_EJECUTAR_EL_QUERY = "Fallo al ejecutar el query: ";
+	public static final String ERROR_INFORMACION = "52"; // Error al consultar la información.
+	
+	public static final String SIAP_DESACTIVADO = "El usuario esta Desactivado en el SIAP";
+	public static final String  SIAP_SIN_CONEXION = "No hay conexion con el SIAP";
+	
+	public static final String EMPTY_STRING = "";
+	public static final String UTF_8 = "UTF-8";
+	
 	private AppConstantes() {
 	    throw new IllegalStateException("AppConstantes class");
 	  }

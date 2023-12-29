@@ -28,5 +28,6 @@ public class CrearRequest {
 	private String fechaValeAGF;
 	private Double importeRegistro;
 	private Boolean cambioMetPago;
+	private Integer idVelatorio;
 	
 }
