@@ -237,25 +237,27 @@ public class PagosUtil {
 		
 	}
 	
-	public String foliosOds() {
+	public String foliosOds(Integer idVelatorio) {
 		
 		String query = "SELECT\r\n"
-				+ "OS.ID_ORDEN_SERVICIO AS id,\r\n"
-				+ "OS.CVE_FOLIO AS folio\r\n"
-				+ "FROM SVC_ORDEN_SERVICIO OS\r\n"
-				+ "INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOS ON EOS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO\r\n"
-				+ "INNER JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO \r\n"
-				+ "WHERE\r\n"
-				+ "OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2,4)\r\n"
-				+ "AND PB.ID_FLUJO_PAGOS = '1' \r\n"
-				+ "AND PB.CVE_ESTATUS_PAGO IN (2,4,8)\r\n"
-				+ "ORDER BY OS.FEC_ALTA ASC";
+				+ " OS.ID_ORDEN_SERVICIO AS id,\r\n"
+				+ " OS.CVE_FOLIO AS folio\r\n"
+				+ " FROM SVC_ORDEN_SERVICIO OS\r\n"
+				+ " INNER JOIN SVC_ESTATUS_ORDEN_SERVICIO EOS ON EOS.ID_ESTATUS_ORDEN_SERVICIO = OS.ID_ESTATUS_ORDEN_SERVICIO\r\n"
+				+ " INNER JOIN SVT_PAGO_BITACORA PB ON PB.ID_REGISTRO = OS.ID_ORDEN_SERVICIO \r\n"
+				+ " WHERE\r\n"
+				+ " OS.ID_ESTATUS_ORDEN_SERVICIO IN (0,2,4)\r\n"
+				+ " AND PB.ID_FLUJO_PAGOS = '1' \r\n"
+				+ " AND PB.CVE_ESTATUS_PAGO IN (2,4,8)\r\n";
+				if (idVelatorio != null )
+					query = query + " AND OS.ID_VELATORIO = " + idVelatorio;
+				query = query + " ORDER BY OS.FEC_ALTA ASC";
 		return query;
 		
 	}
 
 	
-	public String foliosPf() {
+	public String foliosPf(Integer idVelatorio) {
 		
 		String query = "SELECT\r\n"
 				+ "PF.ID_CONVENIO_PF AS id,\r\n"
@@ -267,12 +269,14 @@ public class PagosUtil {
 				+ "WHERE\r\n"
 				+ "PF.ID_ESTATUS_CONVENIO IN (1,2)\r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '2' \r\n"
-				+ "AND PB.CVE_ESTATUS_PAGO IN (2,8)\r\n"
-				+ "ORDER BY PF.FEC_ALTA ASC";
+				+ "AND PB.CVE_ESTATUS_PAGO IN (2,8)\r\n";
+				if (idVelatorio != null )
+					query = query + " AND PF.ID_VELATORIO = " + idVelatorio;
+				query = query + " ORDER BY PF.FEC_ALTA ASC";
 		return query;
 		
 	}
-	public String foliosRpf() {
+	public String foliosRpf(Integer idVelatorio) {
 		
 		String query = "SELECT\r\n"
 				+ "RPF.ID_RENOVACION_CONVENIO_PF AS id,\r\n"
@@ -284,8 +288,10 @@ public class PagosUtil {
 				+ "WHERE\r\n"
 				+ "RPF.ID_ESTATUS IN (1,2)\r\n"
 				+ "AND PB.ID_FLUJO_PAGOS = '3' \r\n"
-				+ "AND PB.CVE_ESTATUS_PAGO IN (2,8)\r\n"
-				+ "ORDER BY RPF.FEC_ALTA ASC;";
+				+ "AND PB.CVE_ESTATUS_PAGO IN (2,8)\r\n";
+				if (idVelatorio != null )
+					query = query + " AND PF.ID_VELATORIO = " + idVelatorio;
+				query = query + " ORDER BY RPF.FEC_ALTA ASC;";
 		return query;
 		
 	}
