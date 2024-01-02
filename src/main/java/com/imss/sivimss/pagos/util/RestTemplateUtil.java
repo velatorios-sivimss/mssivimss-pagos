@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,10 +13,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.imss.sivimss.pagos.exception.BadRequestException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,6 +87,28 @@ public class RestTemplateUtil {
 
 		responseBody = (Response<Object>) responseEntity.getBody();
 
+		return responseBody;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> sendGet(String url, Class<?> clazz) throws IOException {
+		Map<String, Object> responseBody;
+
+		ResponseEntity<?> responseEntity = null;
+		
+		try {
+			responseEntity = restTemplate.getForEntity(url, clazz);
+		}catch (Exception e) {
+			
+			if(e.getMessage().contains("I/O error")) {
+				throw new BadRequestException(HttpStatus.OK, AppConstantes.SIAP_SIN_CONEXION);
+			}else {
+				throw new BadRequestException(HttpStatus.OK, AppConstantes.SIAP_DESACTIVADO);
+			}	
+		}
+		
+		responseBody = (Map<String, Object>) responseEntity.getBody();
+		
 		return responseBody;
 	}
 
@@ -197,4 +223,47 @@ public class RestTemplateUtil {
 
 		return responseBody;
 	}
+
+	public Response<Object> sendGetRequest(String url) {
+		Response<Object> response = new Response<>();
+		ResponseEntity<?> responseEntity = null;
+		try {
+			responseEntity = restTemplate.getForEntity(url, String.class);
+			if (responseEntity.getStatusCode() == HttpStatus.OK) {
+
+				response = mapearRespuesta(responseEntity);
+
+			} else {
+				response.setCodigo(responseEntity.getStatusCodeValue());
+				response.setError(true);
+			}
+		} catch (HttpClientErrorException e) {
+			response.setError(true);
+			response.setCodigo(e.getRawStatusCode());
+		}
+		return response;
+	}
+
+	private Response<Object> mapearRespuesta(ResponseEntity<?> responseEntity) {
+		Response<Object> response = new Response<>();
+		JsonNode json;
+		ObjectMapper mapper = new ObjectMapper();
+		Object object = responseEntity.getBody();
+		if (object != null) {
+			try {
+				json = mapper.readTree(String.valueOf(object));
+				response.setError(false);
+				response.setCodigo(responseEntity.getStatusCodeValue());
+				response.setMensaje(AppConstantes.EXITO);
+				response.setDatos(json);
+			} catch (Exception e) {
+				response.setError(true);
+				response.setCodigo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+				response.setMensaje("186");
+			}
+
+		}
+		return response;
+	}
+	
 }
