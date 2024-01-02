@@ -316,9 +316,11 @@ public class PagosServiceImpl implements PagosService {
 
 	@Override
 	public Response<Object> consultaFolOds(DatosRequest request, Authentication authentication) throws IOException {
-		
+
+		Gson gson = new Gson();
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
 		PagosUtil pagosUtil = new PagosUtil();
-		String query = pagosUtil.foliosOds();
+		String query = pagosUtil.foliosOds(crearRequest.getIdVelatorio());
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
@@ -334,9 +336,11 @@ public class PagosServiceImpl implements PagosService {
 
 	@Override
 	public Response<Object> consultaFolPf(DatosRequest request, Authentication authentication) throws IOException {
-		
+
+		Gson gson = new Gson();
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
 		PagosUtil pagosUtil = new PagosUtil();
-		String query = pagosUtil.foliosPf();
+		String query = pagosUtil.foliosPf(crearRequest.getIdVelatorio());
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
@@ -352,9 +356,11 @@ public class PagosServiceImpl implements PagosService {
 
 	@Override
 	public Response<Object> consultaFolRpf(DatosRequest request, Authentication authentication) throws IOException {
-		
+
+		Gson gson = new Gson();
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
 		PagosUtil pagosUtil = new PagosUtil();
-		String query = pagosUtil.foliosRpf();
+		String query = pagosUtil.foliosRpf(crearRequest.getIdVelatorio());
 		
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
