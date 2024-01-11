@@ -689,4 +689,17 @@ public class PagosUtil {
 		
 		return query.toString();
 	}
+
+	public String obtenerPagoBitacora(String idPagoDetalle) {
+		StringBuilder query = new StringBuilder("SELECT PD.ID_PAGO_BITACORA,\r\n"
+				+"PB.IMP_VALOR,\r\n"
+				+ "PB.ID_FLUJO_PAGOS,\r\n"
+				+ "PB.ID_REGISTRO \r\n"
+				+ "FROM  SVT_PAGO_DETALLE PD\r\n"
+				+"INNER JOIN SVT_PAGO_BITACORA PB ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA\r\n"
+				+ "WHERE\r\n"
+				+ "PD.ID_PAGO_DETALLE = ");
+		query.append(idPagoDetalle);	
+		return query.toString();
+	}
 }

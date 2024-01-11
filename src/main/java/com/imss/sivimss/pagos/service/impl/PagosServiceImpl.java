@@ -71,6 +71,7 @@ public class PagosServiceImpl implements PagosService {
 	private static final String CONSULTA = "consulta";
 	private static final String CONSULTA_PAGINADA = "/paginado";
 	private static final String CONSULTA_GENERICA = "/consulta";
+	private static final String ACTUALIZAR = "/actualizar";
 	private static final String ACTUALIZAR_MULTIPLES = "/actualizar/multiples";
 	private static final String SIN_INFORMACION = "45";
 	private static final String NOM_REPORTE = "reportes/generales/ReporteTablaPagos.jrxml";
@@ -396,6 +397,7 @@ public class PagosServiceImpl implements PagosService {
 		return response;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Response<Object> actualizar(DatosRequest request, Authentication authentication) throws IOException {
 		Gson gson = new Gson();
@@ -403,6 +405,7 @@ public class PagosServiceImpl implements PagosService {
 		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
 		PagosUtil pagosUtil = new PagosUtil();
 		Response<Object> response;
+		
 		String query = pagosUtil.actualizar(crearRequest, usuarioDto.getIdUsuario() );
 
 		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
@@ -412,6 +415,104 @@ public class PagosServiceImpl implements PagosService {
 		
 		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
 				authentication);
+		
+		if(response.getCodigo()==200) {
+			
+			List<Map<String, Object>> listadatos;
+			Double totalPagado;
+			String encoded;
+			String consulta;
+			
+			consulta = pagosUtil.obtenerPagoBitacora(crearRequest.getIdPagoDetalle() );
+			
+			encoded = DatatypeConverter.printBase64Binary(consulta.getBytes("UTF-8"));
+			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+					this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+			
+			request.getDatos().put(AppConstantes.QUERY, encoded);
+			
+			response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+					authentication);
+			
+			listadatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
+			crearRequest.setIdPagoBitacora(listadatos.get(0).get("ID_PAGO_BITACORA").toString());
+			crearRequest.setImporteRegistro((Double) listadatos.get(0).get("IMP_VALOR"));
+			crearRequest.setIdFlujoPago((Integer)listadatos.get(0).get("ID_FLUJO_PAGOS"));
+            crearRequest.setIdRegistro(listadatos.get(0).get("ID_REGISTRO").toString());	
+			consulta = pagosUtil.totalPagado(crearRequest.getIdPagoBitacora() );
+			encoded = DatatypeConverter.printBase64Binary(consulta.getBytes("UTF-8"));
+			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+					this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+			
+			request.getDatos().put(AppConstantes.QUERY, encoded);
+			
+			response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+					authentication);
+			
+			listadatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
+			totalPagado = (Double) listadatos.get(0).get("totalPagado");
+			
+			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+					this.getClass().getPackage().toString(), "","Total Pago BD " + totalPagado, authentication);
+		
+			totalPagado += crearRequest.getImportePago();
+			
+			crearRequest.setImportePago(totalPagado);
+			
+			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+					this.getClass().getPackage().toString(), "","Total Pago Actualizado " + totalPagado, authentication);
+			
+			if( totalPagado >= crearRequest.getImporteRegistro() ) {
+				
+				//Actualizamos la OS y el Pago de la Bitacora a Pagado
+				if( crearRequest.getIdFlujoPago().equals(1) ) {
+					
+					query = pagosUtil.actODs( crearRequest.getIdRegistro(), usuarioDto.getIdUsuario() );
+					logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+							this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+					encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
+					request.getDatos().put(AppConstantes.QUERY, encoded);
+					providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR, 
+							authentication);
+					//querys.add( encoded );
+					
+				} else if ( crearRequest.getIdFlujoPago().equals(2) ) {
+					
+					query = pagosUtil.actConPF( crearRequest.getIdRegistro(), usuarioDto.getIdUsuario() );
+					logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+							this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+					encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
+					request.getDatos().put(AppConstantes.QUERY, encoded);
+					providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR, 
+							authentication);
+					
+				} else if ( crearRequest.getIdFlujoPago().equals(3) ) {
+					
+					query = pagosUtil.actConRenPF( crearRequest.getIdRegistro(), usuarioDto.getIdUsuario() );
+					logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+							this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+					encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
+					request.getDatos().put(AppConstantes.QUERY, encoded);
+					providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR, 
+							authentication);
+					
+				}
+				
+				query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "4", "0" );
+				logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+						this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+				encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
+				request.getDatos().put(AppConstantes.QUERY, encoded);
+				providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR, 
+						authentication);
+				query = pagosUtil.actualizar(crearRequest, usuarioDto.getIdUsuario() );
+
+				request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
+				
+				providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+						authentication);
+		}
+		}
 		
 		return response;
 	}
