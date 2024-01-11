@@ -586,7 +586,7 @@ public class GestionarPagos {
     			+ " ELSE 1 -- 1 no existe uso de AGF y puede usarse la ODS \r\n"
     			+ " END AS agf  "
     			+ " FROM SVT_PAGO_BITACORA PB INNER JOIN SVT_PAGO_DETALLE PD ON PD.ID_PAGO_BITACORA = PB.ID_PAGO_BITACORA "
-    			+ " WHERE PD.ID_METODO_PAGO = 2 AND PD.CVE_ESTATUS = 4 AND PB.ID_FLUJO_PAGOS = 1 AND PB.ID_REGISTRO = " + idODS;
+    			+ " WHERE PD.ID_METODO_PAGO = 2 AND PB.ID_FLUJO_PAGOS = 1 AND PB.ID_REGISTRO = " + idODS;
     	log.info(query); 
         String encoded = DatatypeConverter.printBase64Binary(query.getBytes(StandardCharsets.UTF_8));
 		parametro.put(AppConstantes.QUERY, encoded);
