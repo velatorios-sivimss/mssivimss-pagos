@@ -456,9 +456,9 @@ public class PagosServiceImpl implements PagosService {
 			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 					this.getClass().getPackage().toString(), "","Total Pago BD " + totalPagado, authentication);
 		
-			totalPagado += crearRequest.getImportePago();
+		//	totalPagado += crearRequest.getImportePago();
 			
-			crearRequest.setImportePago(totalPagado);
+	//		crearRequest.setImportePago(totalPagado);
 			
 			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 					this.getClass().getPackage().toString(), "","Total Pago Actualizado " + totalPagado, authentication);
