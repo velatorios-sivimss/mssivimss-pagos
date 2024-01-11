@@ -3,6 +3,7 @@ package com.imss.sivimss.pagos.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -462,7 +463,7 @@ public class PagosServiceImpl implements PagosService {
 			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 					this.getClass().getPackage().toString(), "","Total Pago Actualizado " + totalPagado, authentication);
 			
-			if( totalPagado >= crearRequest.getImporteRegistro() ) {
+			if( crearRequest.getImportePago() >= crearRequest.getImporteRegistro() ) {
 				
 				//Actualizamos la OS y el Pago de la Bitacora a Pagado
 				if( crearRequest.getIdFlujoPago().equals(1) ) {
@@ -505,15 +506,16 @@ public class PagosServiceImpl implements PagosService {
 				request.getDatos().put(AppConstantes.QUERY, encoded);
 				providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR, 
 						authentication);
-				query = pagosUtil.actualizar(crearRequest, usuarioDto.getIdUsuario() );
+				/*query = pagosUtil.actualizar(crearRequest, usuarioDto.getIdUsuario() );
 
 				request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
 				
 				providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
-						authentication);
+						authentication); */
 		}
 		}
 		
+	
 		return response;
 	}
 
