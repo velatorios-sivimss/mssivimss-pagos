@@ -463,7 +463,7 @@ public class PagosServiceImpl implements PagosService {
 			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 					this.getClass().getPackage().toString(), "","Total Pago Actualizado " + totalPagado, authentication);
 			
-			if( totalPagado >= crearRequest.getImporteRegistro() ) {
+			if( crearRequest.getImportePago() >= crearRequest.getImporteRegistro() ) {
 				
 				//Actualizamos la OS y el Pago de la Bitacora a Pagado
 				if( crearRequest.getIdFlujoPago().equals(1) ) {
