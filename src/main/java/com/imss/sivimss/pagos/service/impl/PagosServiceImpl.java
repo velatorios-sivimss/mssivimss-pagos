@@ -421,34 +421,28 @@ public class PagosServiceImpl implements PagosService {
 			
 			List<Map<String, Object>> listadatos;
 			Double totalPagado;
-			String encoded;
+			String encoded="";
 			String consulta;
 			
 			consulta = pagosUtil.obtenerPagoBitacora(crearRequest.getIdPagoDetalle() );
 			
-			encoded = DatatypeConverter.printBase64Binary(consulta.getBytes("UTF-8"));
-			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
-					this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+			response = llamarServicio(consulta, encoded, request, authentication, CONSULTA_GENERICA);
 			
-			request.getDatos().put(AppConstantes.QUERY, encoded);
-			
-			response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
-					authentication);
 			
 			listadatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
 			crearRequest.setIdPagoBitacora(listadatos.get(0).get("ID_PAGO_BITACORA").toString());
 			crearRequest.setImporteRegistro((Double) listadatos.get(0).get("IMP_VALOR"));
 			crearRequest.setIdFlujoPago((Integer)listadatos.get(0).get("ID_FLUJO_PAGOS"));
-            crearRequest.setIdRegistro(listadatos.get(0).get("ID_REGISTRO").toString());	
+            crearRequest.setIdRegistro(listadatos.get(0).get("ID_REGISTRO").toString());
+            
 			consulta = pagosUtil.totalPagado(crearRequest.getIdPagoBitacora() );
-			encoded = DatatypeConverter.printBase64Binary(consulta.getBytes("UTF-8"));
+			/*encoded = DatatypeConverter.printBase64Binary(consulta.getBytes("UTF-8"));
 			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 					this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
 			
-			request.getDatos().put(AppConstantes.QUERY, encoded);
+			request.getDatos().put(AppConstantes.QUERY, encoded);*/
 			
-			response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
-					authentication);
+			response = llamarServicio(consulta, encoded, request, authentication, CONSULTA_GENERICA);
 			
 			listadatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
 			totalPagado = (Double) listadatos.get(0).get("totalPagado");
@@ -463,7 +457,7 @@ public class PagosServiceImpl implements PagosService {
 			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
 					this.getClass().getPackage().toString(), "","Total Pago Actualizado " + totalPagado, authentication);
 			
-			if( crearRequest.getImportePago() >= crearRequest.getImporteRegistro() ) {
+			if( totalPagado >= crearRequest.getImporteRegistro() ) {
 				
 				//Actualizamos la OS y el Pago de la Bitacora a Pagado
 				if( crearRequest.getIdFlujoPago().equals(1) ) {
@@ -517,6 +511,16 @@ public class PagosServiceImpl implements PagosService {
 		
 	
 		return response;
+	}
+
+	private Response<Object> llamarServicio(String consulta, String encoded, DatosRequest request, Authentication authentication, String path) throws IOException {
+		encoded = DatatypeConverter.printBase64Binary(consulta.getBytes("UTF-8"));
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
+				this.getClass().getPackage().toString(), "",CONSULTA +" " + consulta, authentication);
+		
+		request.getDatos().put(AppConstantes.QUERY, encoded);
+		return providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + path, 
+				authentication);
 	}
 
 	@Override
