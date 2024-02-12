@@ -29,5 +29,6 @@ public class DetalleResponse {
 	private String nss;
 	private String idFinado;
 	private String generarPagare;
+	private String idPlataforma;
 	private List<Map<String, Object>> metodosPago;
 }
