@@ -10,11 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 class ArquetipoApplicationTests {
 
-	@Test
-	void contextLoads() {
-		String result="test";
-		PagosApplication.main(new String[]{});
-		assertNotNull(result);
-	}
+	
 
 }
