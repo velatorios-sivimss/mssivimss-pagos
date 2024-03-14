@@ -174,6 +174,7 @@ public class PagosServiceImpl implements PagosService {
 		Gson gson = new Gson();
 		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
 
+		log.info("----------------------------------------------------------------------------------------------------------------");
 		SqlSessionFactory sqlSessionFactory = myBatisConfig.buildqlSessionFactory();
 		PagoBitacora pagoAntes = new PagoBitacora();
 		try (SqlSession session = sqlSessionFactory.openSession()) {
@@ -186,6 +187,7 @@ public class PagosServiceImpl implements PagosService {
 				log.error(e.getMessage());
 			}
 		}
+		log.info("----------------------------------------------------------------------------------------------------------------");
 
 		
 		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
@@ -295,6 +297,7 @@ public class PagosServiceImpl implements PagosService {
 					authentication);
 		}
 		
+		log.info("----------------------------------------------------------------------------------------------------------------");
 		PagoBitacora pagoDespues = new PagoBitacora();
 		try (SqlSession session = sqlSessionFactory.openSession()) {
 			Consultas consultas = session.getMapper(Consultas.class);
@@ -303,15 +306,19 @@ public class PagosServiceImpl implements PagosService {
 				String seleccionarPago = sqlLoader.getSeleccionarPago().replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
 				pagoDespues = consultas.consultaPagosBitacora(seleccionarPago);
 				
+				String pagoAntesString = gson.toJson(pagoAntes);
+				String pagoDespuesString = gson.toJson(pagoDespues);
+
 				String queryBitacora = sqlLoader.getBitacoraNuevoRegistro();
-				consultas.insertData(queryBitacora, new Bitacora(1, "SVT_PAGO_BITACORA", pagoAntes.toString(), pagoDespues.toString(), usuarioDto.getIdUsuario()));
+				consultas.insertData(queryBitacora, new Bitacora(1, "SVT_PAGO_BITACORA", pagoAntesString, pagoDespuesString, usuarioDto.getIdUsuario()));
 				session.commit();
 			} catch (Exception e) {
 				session.rollback();
 				log.error(e.getMessage());
 			}
 		}
-		
+		log.info("----------------------------------------------------------------------------------------------------------------");
+
 		return response;
 	
 	}
