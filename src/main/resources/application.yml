@@ -16,6 +16,12 @@ spring:
     multipart:
       max-file-size: 30MB
       max-request-size: 30MB
+
+  datasource:
+    driverClassName: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://127.0.0.1:3306/bdarquetipojdbc:mysql://10.250.10.47:3306/SIVIBDUAT?useunicode=true&characterEncoding=utf-8&useJDBCCompilantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimeZone=America/Mexico_city
+    username: SIVIBDUAT_USER
+    password: user_uatSIVI
             
 logging:
   level:
