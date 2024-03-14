@@ -43,9 +43,9 @@ public class MyBatisConfig {
 	
 
 	public SqlSessionFactory buildqlSessionFactory() {
-		DRIVER = DRIVER.replace("jdbc:mysql", "jdbc:mariadb");
+		URL = URL.replace("jdbc:mysql", "jdbc:mariadb");
 		log.info("----------------------------------------------------------------------------------------------------------------");
-		log.info(DRIVER);
+		log.info(URL);
 		log.info("----------------------------------------------------------------------------------------------------------------");
 	    DataSource dataSource = new PooledDataSource(DRIVER, URL, USERNAME, PASSWORD);
 
