@@ -177,12 +177,15 @@ public class PagosServiceImpl implements PagosService {
 		log.info("----------------------------------------------------------------------------------------------------------------");
 		SqlSessionFactory sqlSessionFactory = myBatisConfig.buildqlSessionFactory();
 		PagoBitacora pagoAntes = new PagoBitacora();
+		String idPago = crearRequest.getIdPagoBitacora();
+		String idOds = crearRequest.getIdRegistro();
+
 		try (SqlSession session = sqlSessionFactory.openSession()) {
 			log.info("Sesion abierta");
 			Consultas consultas = session.getMapper(Consultas.class);
 			log.info("Mapper creado");
 			try {
-				String seleccionarPago = sqlLoader.getSeleccionarPago();
+				String seleccionarPago = sqlLoader.getPagoBitacora();
 				seleccionarPago =seleccionarPago.replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
 				log.info("seleccionarPago "+seleccionarPago);
 
@@ -307,7 +310,7 @@ public class PagosServiceImpl implements PagosService {
 			Consultas consultas = session.getMapper(Consultas.class);
 
 			try {
-				String seleccionarPago = sqlLoader.getSeleccionarPago().replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
+				String seleccionarPago = sqlLoader.getPagoBitacora().replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
 				pagoDespues = consultas.consultaPagosBitacora(seleccionarPago);
 				
 				String pagoAntesString = gson.toJson(pagoAntes);
