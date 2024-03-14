@@ -3,7 +3,6 @@ package com.imss.sivimss.pagos.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,8 @@ import java.util.logging.Level;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import com.google.gson.Gson;
 import com.imss.sivimss.pagos.service.PagosService;
 import com.imss.sivimss.pagos.util.DatosRequest;
 import com.imss.sivimss.pagos.util.Response;
+import com.imss.sivimss.pagos.util.SQLLoader;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +36,10 @@ import com.imss.sivimss.pagos.util.ProviderServiceRestTemplate;
 import com.imss.sivimss.pagos.util.LogUtil;
 import com.imss.sivimss.pagos.util.PagosUtil;
 import com.imss.sivimss.pagos.beans.GestionarPagos;
+import com.imss.sivimss.pagos.configuration.MyBatisConfig;
+import com.imss.sivimss.pagos.configuration.mapper.Consultas;
+import com.imss.sivimss.pagos.model.entity.Bitacora;
+import com.imss.sivimss.pagos.model.entity.PagoBitacora;
 import com.imss.sivimss.pagos.model.request.ActualizarMultiRequest;
 import com.imss.sivimss.pagos.model.request.AgfDto;
 import com.imss.sivimss.pagos.model.request.ContratanteRequest;
@@ -68,6 +74,12 @@ public class PagosServiceImpl implements PagosService {
 	
 	@Autowired
 	private ModelMapper modelMapper;
+
+	@Autowired
+	private MyBatisConfig myBatisConfig;
+
+	@Autowired
+	private SQLLoader sqlLoader;
 	
 	private static final String CONSULTA = "consulta";
 	private static final String CONSULTA_PAGINADA = "/paginado";
@@ -159,9 +171,23 @@ public class PagosServiceImpl implements PagosService {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Response<Object> crear(DatosRequest request, Authentication authentication) throws IOException {
-		
 		Gson gson = new Gson();
 		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
+
+		SqlSessionFactory sqlSessionFactory = myBatisConfig.buildqlSessionFactory();
+		PagoBitacora pagoAntes = new PagoBitacora();
+		try (SqlSession session = sqlSessionFactory.openSession()) {
+			Consultas consultas = session.getMapper(Consultas.class);
+
+			try {
+				String seleccionarPago = sqlLoader.getSeleccionarPago().replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
+				pagoAntes = consultas.consultaPagosBitacora(seleccionarPago);
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
+
+		
 		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
 		ArrayList<String> querys = new ArrayList<>();
 		PagosUtil pagosUtil = new PagosUtil();
@@ -269,6 +295,20 @@ public class PagosServiceImpl implements PagosService {
 					authentication);
 		}
 		
+		PagoBitacora pagoDespues = new PagoBitacora();
+		try (SqlSession session = sqlSessionFactory.openSession()) {
+			Consultas consultas = session.getMapper(Consultas.class);
+
+			try {
+				String seleccionarPago = sqlLoader.getSeleccionarPago().replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
+				pagoDespues = consultas.consultaPagosBitacora(seleccionarPago);
+				
+				String queryBitacora = sqlLoader.getBitacoraNuevoRegistro();
+				consultas.insertData(queryBitacora, new Bitacora(1, "SVT_PAGO_BITACORA", pagoAntes.toString(), pagoDespues.toString(), usuarioDto.getIdUsuario()));
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
 		
 		return response;
 	
