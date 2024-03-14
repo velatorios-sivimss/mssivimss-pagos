@@ -19,9 +19,9 @@ spring:
 
   datasource:
     driverClassName: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://127.0.0.1:3306/bdarquetipojdbc:mysql://10.250.10.47:3306/SIVIBDUAT?useunicode=true&characterEncoding=utf-8&useJDBCCompilantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimeZone=America/Mexico_city
-    username: SIVIBDUAT_USER
-    password: user_uatSIVI
+    url: ${msit_CONNECTION_DB}
+    username: ${msit_USERNAME_DB}
+    password: ${msit_PASSWORD_DB}
             
 logging:
   level:
@@ -77,3 +77,5 @@ resilience4j.timelimiter:
         
 formato_fecha: ${msit_FORMATO_FECHA}
 ruta-log: ${msit_RUTA_LOG}
+
+enviroment: Develop
