@@ -178,10 +178,13 @@ public class PagosServiceImpl implements PagosService {
 		SqlSessionFactory sqlSessionFactory = myBatisConfig.buildqlSessionFactory();
 		PagoBitacora pagoAntes = new PagoBitacora();
 		try (SqlSession session = sqlSessionFactory.openSession()) {
+			log.info("Sesion abierta");
 			Consultas consultas = session.getMapper(Consultas.class);
-
+			log.info("Mapper creado");
 			try {
 				String seleccionarPago = sqlLoader.getSeleccionarPago().replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
+				log.info("seleccionarPago");
+
 				pagoAntes = consultas.consultaPagosBitacora(seleccionarPago);
 			} catch (Exception e) {
 				log.error(e.getMessage());
