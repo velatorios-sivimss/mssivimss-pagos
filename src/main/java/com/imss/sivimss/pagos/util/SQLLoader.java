@@ -33,7 +33,7 @@ public class SQLLoader {
 
         resource = resourceLoader.getResource("classpath:sql/PAGOS_CONSULTA_REGISTRO.SQL");
         bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
-        bitacoraNuevoRegistro = new String(bytes, StandardCharsets.UTF_8);
+        seleccionarPago = new String(bytes, StandardCharsets.UTF_8);
 
     }
 
