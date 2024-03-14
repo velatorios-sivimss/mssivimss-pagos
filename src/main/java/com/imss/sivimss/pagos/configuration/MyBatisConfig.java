@@ -18,11 +18,12 @@ import org.springframework.stereotype.Service;
 
 import com.imss.sivimss.pagos.configuration.mapper.Consultas;
 
+import lombok.extern.slf4j.Slf4j;
 
 
 
+@Slf4j
 @Service
-@EnableCaching
 public class MyBatisConfig {
 	
 	@Value("${spring.datasource.driverClassName}") 
@@ -40,13 +41,12 @@ public class MyBatisConfig {
 	@Value("${enviroment}")
 	private String ENVIROMENT;
 	
-	@Bean
-    public CacheManager cacheManager() {
-        return new ConcurrentMapCacheManager("personas");
-    }
 
 	public SqlSessionFactory buildqlSessionFactory() {
 		DRIVER = DRIVER.replace("jdbc:mysql", "jdbc:mariadb");
+		log.info("----------------------------------------------------------------------------------------------------------------");
+		log.info(DRIVER);
+		log.info("----------------------------------------------------------------------------------------------------------------");
 	    DataSource dataSource = new PooledDataSource(DRIVER, URL, USERNAME, PASSWORD);
 
 	    Environment environment = new Environment(ENVIROMENT, new JdbcTransactionFactory(), dataSource);
