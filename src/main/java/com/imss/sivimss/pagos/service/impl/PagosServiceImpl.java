@@ -182,8 +182,9 @@ public class PagosServiceImpl implements PagosService {
 			Consultas consultas = session.getMapper(Consultas.class);
 			log.info("Mapper creado");
 			try {
-				String seleccionarPago = sqlLoader.getSeleccionarPago().replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
-				log.info("seleccionarPago");
+				String seleccionarPago = sqlLoader.getSeleccionarPago();
+				seleccionarPago =seleccionarPago.replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
+				log.info("seleccionarPago "+seleccionarPago);
 
 				pagoAntes = consultas.consultaPagosBitacora(seleccionarPago);
 			} catch (Exception e) {
