@@ -305,7 +305,9 @@ public class PagosServiceImpl implements PagosService {
 				
 				String queryBitacora = sqlLoader.getBitacoraNuevoRegistro();
 				consultas.insertData(queryBitacora, new Bitacora(1, "SVT_PAGO_BITACORA", pagoAntes.toString(), pagoDespues.toString(), usuarioDto.getIdUsuario()));
+				session.commit();
 			} catch (Exception e) {
+				session.rollback();
 				log.error(e.getMessage());
 			}
 		}
