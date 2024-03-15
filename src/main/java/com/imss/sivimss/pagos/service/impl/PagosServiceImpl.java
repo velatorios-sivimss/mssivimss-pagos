@@ -39,7 +39,9 @@ import com.imss.sivimss.pagos.beans.GestionarPagos;
 import com.imss.sivimss.pagos.configuration.MyBatisConfig;
 import com.imss.sivimss.pagos.configuration.mapper.Consultas;
 import com.imss.sivimss.pagos.model.entity.Bitacora;
+import com.imss.sivimss.pagos.model.entity.OrdenesServicio;
 import com.imss.sivimss.pagos.model.entity.PagoBitacora;
+import com.imss.sivimss.pagos.model.entity.PagoBitacoraDetalles;
 import com.imss.sivimss.pagos.model.request.ActualizarMultiRequest;
 import com.imss.sivimss.pagos.model.request.AgfDto;
 import com.imss.sivimss.pagos.model.request.ContratanteRequest;
@@ -124,6 +126,31 @@ public class PagosServiceImpl implements PagosService {
 		Response<Object> response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_PAGINADA, 
 				authentication);
 		
+				log.info("----------------------------------------------------------------------------------------------------------------");
+		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
+		SqlSessionFactory sqlSessionFactory = myBatisConfig.buildqlSessionFactory();
+		PagoBitacora pagoDespues = new PagoBitacora();
+		List<PagoBitacoraDetalles> pagoDetallesDespues = null;
+		OrdenesServicio ordenesServAntesDespues = null;
+		try (SqlSession session = sqlSessionFactory.openSession()) {
+			Consultas consultas = session.getMapper(Consultas.class);
+
+			try {
+
+				String queryBitacora = sqlLoader.getBitacoraNuevoRegistro();
+				consultas.insertData(queryBitacora, new Bitacora(4, "SVT_PAGO_BITACORA", null, response.getDatos().toString(), usuarioDto.getIdUsuario()));
+							
+				session.commit();
+			} catch (Exception e) {
+				session.rollback();
+				log.error(e.getMessage());
+			}
+		}
+		log.info("----------------------------------------------------------------------------------------------------------------");
+		
+
+
+
 		return MensajeResponseUtil.mensajeConsultaResponse( response, SIN_INFORMACION );
 		
 	}
@@ -164,6 +191,8 @@ public class PagosServiceImpl implements PagosService {
 		Response<Object> response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_PAGINADA, 
 				authentication);
 		
+
+		
 		return MensajeResponseUtil.mensajeConsultaResponse( response, SIN_INFORMACION );
 		
 	}
@@ -177,19 +206,31 @@ public class PagosServiceImpl implements PagosService {
 		log.info("----------------------------------------------------------------------------------------------------------------");
 		SqlSessionFactory sqlSessionFactory = myBatisConfig.buildqlSessionFactory();
 		PagoBitacora pagoAntes = new PagoBitacora();
+		List<PagoBitacoraDetalles> pagoDetallesAntes = null;
+		OrdenesServicio ordenesServAntes = null;
 		String idPago = crearRequest.getIdPagoBitacora();
 		String idOds = crearRequest.getIdRegistro();
 
 		try (SqlSession session = sqlSessionFactory.openSession()) {
-			log.info("Sesion abierta");
+			
 			Consultas consultas = session.getMapper(Consultas.class);
-			log.info("Mapper creado");
+			
 			try {
 				String seleccionarPago = sqlLoader.getPagoBitacora();
-				seleccionarPago =seleccionarPago.replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
-				log.info("seleccionarPago "+seleccionarPago);
+				seleccionarPago =seleccionarPago.replace("#{idBitacora}", idPago);
+
+				String seleccionarPagoDetalles = sqlLoader.getPagoBitacoraDetalles();
+				seleccionarPagoDetalles = seleccionarPagoDetalles.replace("#{idBitacora}", idPago);
+
+				String seleccionarOds = sqlLoader.getOrdenesDeServ();
+				seleccionarOds  = seleccionarOds.replace("#{idBitacora}", idOds);
+				
 
 				pagoAntes = consultas.consultaPagosBitacora(seleccionarPago);
+				
+				pagoDetallesAntes = consultas.consultaPagosBitacoraDetalle(seleccionarPagoDetalles);
+				ordenesServAntes = consultas.consultaOrdenesServicio(seleccionarOds);
+
 			} catch (Exception e) {
 				log.error(e.getMessage());
 			}
@@ -306,6 +347,8 @@ public class PagosServiceImpl implements PagosService {
 		
 		log.info("----------------------------------------------------------------------------------------------------------------");
 		PagoBitacora pagoDespues = new PagoBitacora();
+		List<PagoBitacoraDetalles> pagoDetallesDespues = null;
+		OrdenesServicio ordenesServAntesDespues = null;
 		try (SqlSession session = sqlSessionFactory.openSession()) {
 			Consultas consultas = session.getMapper(Consultas.class);
 
@@ -313,11 +356,21 @@ public class PagosServiceImpl implements PagosService {
 				String seleccionarPago = sqlLoader.getPagoBitacora().replace("#{idBitacora}", crearRequest.getIdPagoBitacora());
 				pagoDespues = consultas.consultaPagosBitacora(seleccionarPago);
 				
-				String pagoAntesString = gson.toJson(pagoAntes);
-				String pagoDespuesString = gson.toJson(pagoDespues);
+				String seleccionarPagoDetalles = sqlLoader.getPagoBitacoraDetalles();
+				seleccionarPagoDetalles = seleccionarPagoDetalles.replace("#{idBitacora}", idPago);
+
+				String seleccionarOds = sqlLoader.getOrdenesDeServ();
+				seleccionarOds  = seleccionarOds.replace("#{idBitacora}", idOds);
+
+				
+				pagoDetallesDespues = consultas.consultaPagosBitacoraDetalle(seleccionarPagoDetalles);
+				ordenesServAntesDespues = consultas.consultaOrdenesServicio(seleccionarOds);
 
 				String queryBitacora = sqlLoader.getBitacoraNuevoRegistro();
-				consultas.insertData(queryBitacora, new Bitacora(1, "SVT_PAGO_BITACORA", pagoAntesString, pagoDespuesString, usuarioDto.getIdUsuario()));
+				consultas.insertData(queryBitacora, new Bitacora(1, "SVT_PAGO_BITACORA", pagoAntes.toString(), pagoDespues.toString(), usuarioDto.getIdUsuario()));
+				consultas.insertData(queryBitacora, new Bitacora(1, "SVC_ORDEN_SERVICIO", ordenesServAntes.toString(), ordenesServAntesDespues.toString(), usuarioDto.getIdUsuario()));
+				consultas.insertData(queryBitacora, new Bitacora(1, "SVT_PAGO_DETALLE", pagoDetallesAntes.toString(), pagoDetallesDespues.toString(), usuarioDto.getIdUsuario()));
+								
 				session.commit();
 			} catch (Exception e) {
 				session.rollback();
@@ -435,22 +488,76 @@ public class PagosServiceImpl implements PagosService {
 
 	@Override
 	public Response<Object> eliminar(DatosRequest request, Authentication authentication) throws IOException {
-		
+
 		Gson gson = new Gson();
-		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)),
+				CrearRequest.class);
+
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+		SqlSessionFactory sqlSessionFactory = myBatisConfig.buildqlSessionFactory();
+		List<PagoBitacoraDetalles> pagoDetallesAntes = null;
+		String idPago = crearRequest.getIdPagoDetalle();
+		try (SqlSession session = sqlSessionFactory.openSession()) {
+
+			Consultas consultas = session.getMapper(Consultas.class);
+
+			try {
+
+				String seleccionarPagoDetalles = sqlLoader.getPagoBitacoraDetallesBuscarPorID();
+				log.info(seleccionarPagoDetalles);
+				seleccionarPagoDetalles = seleccionarPagoDetalles.replace("#{idBitacora}", idPago);
+
+				pagoDetallesAntes = consultas.consultaPagosBitacoraDetalle(seleccionarPagoDetalles);
+
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+
 		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
 		PagosUtil pagosUtil = new PagosUtil();
 		Response<Object> response;
-		String query = pagosUtil.eliminar(crearRequest.getIdPagoDetalle(), usuarioDto.getIdUsuario() );
+		String query = pagosUtil.eliminar(crearRequest.getIdPagoDetalle(), usuarioDto.getIdUsuario());
 
-		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
-				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
-		
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),
+				this.getClass().getPackage().toString(), "", CONSULTA + " " + query, authentication);
+
 		request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
-		
-		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+
+		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA,
 				authentication);
-		
+
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+		List<PagoBitacoraDetalles> pagoDetallesDespues = null;
+		try (SqlSession session = sqlSessionFactory.openSession()) {
+			Consultas consultas = session.getMapper(Consultas.class);
+
+			try {
+				
+				String seleccionarPagoDetalles = sqlLoader.getPagoBitacoraDetallesBuscarPorID();
+				log.info(seleccionarPagoDetalles);
+				seleccionarPagoDetalles = seleccionarPagoDetalles.replace("#{idBitacora}", idPago);
+				
+
+				pagoDetallesDespues = consultas.consultaPagosBitacoraDetalle(seleccionarPagoDetalles);
+
+				String queryBitacora = sqlLoader.getBitacoraNuevoRegistro();
+				consultas.insertData(queryBitacora, new Bitacora(3, "SVT_PAGO_DETALLE", pagoDetallesAntes.toString(),
+						pagoDetallesDespues.toString(), usuarioDto.getIdUsuario()));
+
+				session.commit();
+			} catch (Exception e) {
+				session.rollback();
+				log.error(e.getMessage());
+			}
+		}
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+
 		return response;
 	}
 
@@ -458,114 +565,173 @@ public class PagosServiceImpl implements PagosService {
 	@Override
 	public Response<Object> actualizar(DatosRequest request, Authentication authentication) throws IOException {
 		Gson gson = new Gson();
-		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
+		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)),
+				CrearRequest.class);
 		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
 		PagosUtil pagosUtil = new PagosUtil();
 		Response<Object> response;
-		
-		String query = pagosUtil.actualizar(crearRequest, usuarioDto.getIdUsuario() );
 
-		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
-				this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
-		
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+		SqlSessionFactory sqlSessionFactory = myBatisConfig.buildqlSessionFactory();
+		List<PagoBitacoraDetalles> pagoDetallesAntes = null;
+		String idPago = crearRequest.getIdPagoDetalle();
+		try (SqlSession session = sqlSessionFactory.openSession()) {
+
+			Consultas consultas = session.getMapper(Consultas.class);
+
+			try {
+
+				String seleccionarPagoDetalles = sqlLoader.getPagoBitacoraDetallesBuscarPorID();
+				log.info(seleccionarPagoDetalles);
+				seleccionarPagoDetalles = seleccionarPagoDetalles.replace("#{idBitacora}", idPago);
+
+				pagoDetallesAntes = consultas.consultaPagosBitacoraDetalle(seleccionarPagoDetalles);
+
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+
+		String query = pagosUtil.actualizar(crearRequest, usuarioDto.getIdUsuario());
+
+		logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),
+				this.getClass().getPackage().toString(), "", CONSULTA + " " + query, authentication);
+
 		request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
-		
-		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
+
+		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA,
 				authentication);
-		
-		if(response.getCodigo()==200) {
-			
+
+		if (response.getCodigo() == 200) {
+
 			List<Map<String, Object>> listadatos;
 			Double totalPagado;
-			String encoded="";
+			String encoded = "";
 			String consulta;
-			
-			consulta = pagosUtil.obtenerPagoBitacora(crearRequest.getIdPagoDetalle() );
-			
+
+			consulta = pagosUtil.obtenerPagoBitacora(crearRequest.getIdPagoDetalle());
+
 			response = llamarServicio(consulta, encoded, request, authentication, CONSULTA_GENERICA);
-			
-			
+
 			listadatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
 			crearRequest.setIdPagoBitacora(listadatos.get(0).get("ID_PAGO_BITACORA").toString());
 			crearRequest.setImporteRegistro((Double) listadatos.get(0).get("IMP_VALOR"));
-			crearRequest.setIdFlujoPago((Integer)listadatos.get(0).get("ID_FLUJO_PAGOS"));
-            crearRequest.setIdRegistro(listadatos.get(0).get("ID_REGISTRO").toString());
-            
-			consulta = pagosUtil.totalPagado(crearRequest.getIdPagoBitacora() );
-			/*encoded = DatatypeConverter.printBase64Binary(consulta.getBytes("UTF-8"));
-			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
-					this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
-			
-			request.getDatos().put(AppConstantes.QUERY, encoded);*/
-			
+			crearRequest.setIdFlujoPago((Integer) listadatos.get(0).get("ID_FLUJO_PAGOS"));
+			crearRequest.setIdRegistro(listadatos.get(0).get("ID_REGISTRO").toString());
+
+			consulta = pagosUtil.totalPagado(crearRequest.getIdPagoBitacora());
+			/*
+			 * encoded = DatatypeConverter.printBase64Binary(consulta.getBytes("UTF-8"));
+			 * logUtil.crearArchivoLog(Level.INFO.toString(),
+			 * this.getClass().getSimpleName(),
+			 * this.getClass().getPackage().toString(), "",CONSULTA +" " + query,
+			 * authentication);
+			 * 
+			 * request.getDatos().put(AppConstantes.QUERY, encoded);
+			 */
+
 			response = llamarServicio(consulta, encoded, request, authentication, CONSULTA_GENERICA);
-			
+
 			listadatos = Arrays.asList(modelMapper.map(response.getDatos(), Map[].class));
 			totalPagado = (Double) listadatos.get(0).get("totalPagado");
-			
-			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
-					this.getClass().getPackage().toString(), "","Total Pago BD " + totalPagado, authentication);
-		
-		//	totalPagado += crearRequest.getImportePago();
-			
-	//		crearRequest.setImportePago(totalPagado);
-			
-			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
-					this.getClass().getPackage().toString(), "","Total Pago Actualizado " + totalPagado, authentication);
-			
-			if( totalPagado >= crearRequest.getImporteRegistro() ) {
-				
-				//Actualizamos la OS y el Pago de la Bitacora a Pagado
-				if( crearRequest.getIdFlujoPago().equals(1) ) {
-					
-					query = pagosUtil.actODs( crearRequest.getIdRegistro(), usuarioDto.getIdUsuario() );
-					logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
-							this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+
+			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),
+					this.getClass().getPackage().toString(), "", "Total Pago BD " + totalPagado, authentication);
+
+			// totalPagado += crearRequest.getImportePago();
+
+			// crearRequest.setImportePago(totalPagado);
+
+			logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),
+					this.getClass().getPackage().toString(), "", "Total Pago Actualizado " + totalPagado,
+					authentication);
+
+			if (totalPagado >= crearRequest.getImporteRegistro()) {
+
+				// Actualizamos la OS y el Pago de la Bitacora a Pagado
+				if (crearRequest.getIdFlujoPago().equals(1)) {
+
+					query = pagosUtil.actODs(crearRequest.getIdRegistro(), usuarioDto.getIdUsuario());
+					logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),
+							this.getClass().getPackage().toString(), "", CONSULTA + " " + query, authentication);
 					encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
 					request.getDatos().put(AppConstantes.QUERY, encoded);
-					providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR, 
+					providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR,
 							authentication);
-					//querys.add( encoded );
-					
-				} else if ( crearRequest.getIdFlujoPago().equals(2) ) {
-					
-					query = pagosUtil.actConPF( crearRequest.getIdRegistro(), usuarioDto.getIdUsuario() );
-					logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
-							this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+					// querys.add( encoded );
+
+				} else if (crearRequest.getIdFlujoPago().equals(2)) {
+
+					query = pagosUtil.actConPF(crearRequest.getIdRegistro(), usuarioDto.getIdUsuario());
+					logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),
+							this.getClass().getPackage().toString(), "", CONSULTA + " " + query, authentication);
 					encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
 					request.getDatos().put(AppConstantes.QUERY, encoded);
-					providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR, 
+					providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR,
 							authentication);
-					
-				} else if ( crearRequest.getIdFlujoPago().equals(3) ) {
-					
-					query = pagosUtil.actConRenPF( crearRequest.getIdRegistro(), usuarioDto.getIdUsuario() );
-					logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
-							this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+
+				} else if (crearRequest.getIdFlujoPago().equals(3)) {
+
+					query = pagosUtil.actConRenPF(crearRequest.getIdRegistro(), usuarioDto.getIdUsuario());
+					logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),
+							this.getClass().getPackage().toString(), "", CONSULTA + " " + query, authentication);
 					encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
 					request.getDatos().put(AppConstantes.QUERY, encoded);
-					providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR, 
+					providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR,
 							authentication);
-					
+
 				}
-				
-				query = pagosUtil.actPB( crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "4", "0" );
-				logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(), 
-						this.getClass().getPackage().toString(), "",CONSULTA +" " + query, authentication);
+
+				query = pagosUtil.actPB(crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario(), "4", "0");
+				logUtil.crearArchivoLog(Level.INFO.toString(), this.getClass().getSimpleName(),
+						this.getClass().getPackage().toString(), "", CONSULTA + " " + query, authentication);
 				encoded = DatatypeConverter.printBase64Binary(query.getBytes("UTF-8"));
 				request.getDatos().put(AppConstantes.QUERY, encoded);
-				providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR, 
+				providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + ACTUALIZAR,
 						authentication);
-				/*query = pagosUtil.actualizar(crearRequest, usuarioDto.getIdUsuario() );
+				/*
+				 * query = pagosUtil.actualizar(crearRequest, usuarioDto.getIdUsuario() );
+				 * 
+				 * request.getDatos().put(AppConstantes.QUERY,
+				 * DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
+				 * 
+				 * providerRestTemplate.consumirServicio(request.getDatos(), urlDomino +
+				 * CONSULTA_GENERICA,
+				 * authentication);
+				 */
+			}
+		}
 
-				request.getDatos().put(AppConstantes.QUERY, DatatypeConverter.printBase64Binary(query.getBytes("UTF-8")));
-				
-				providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
-						authentication); */
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+		List<PagoBitacoraDetalles> pagoDetallesDespues = null;
+		try (SqlSession session = sqlSessionFactory.openSession()) {
+			Consultas consultas = session.getMapper(Consultas.class);
+
+			try {
+
+				String seleccionarPagoDetalles = sqlLoader.getPagoBitacoraDetallesBuscarPorID();
+				log.info(seleccionarPagoDetalles);
+				seleccionarPagoDetalles = seleccionarPagoDetalles.replace("#{idBitacora}", idPago);
+
+				pagoDetallesDespues = consultas.consultaPagosBitacoraDetalle(seleccionarPagoDetalles);
+
+				String queryBitacora = sqlLoader.getBitacoraNuevoRegistro();
+				consultas.insertData(queryBitacora, new Bitacora(2, "SVT_PAGO_DETALLE", pagoDetallesAntes.toString(),
+						pagoDetallesDespues.toString(), usuarioDto.getIdUsuario()));
+
+				session.commit();
+			} catch (Exception e) {
+				session.rollback();
+				log.error(e.getMessage());
+			}
 		}
-		}
-		
-	
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+
 		return response;
 	}
 
@@ -585,6 +751,35 @@ public class PagosServiceImpl implements PagosService {
 		CrearRequest crearRequest = gson.fromJson(String.valueOf(request.getDatos().get(AppConstantes.DATOS)), CrearRequest.class);
 		UsuarioDto usuarioDto = gson.fromJson((String) authentication.getPrincipal(), UsuarioDto.class);
 		PagosUtil pagosUtil = new PagosUtil();
+
+
+
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+		SqlSessionFactory sqlSessionFactory = myBatisConfig.buildqlSessionFactory();
+		List<PagoBitacoraDetalles> pagoDetallesAntes = null;
+		String idPago = crearRequest.getIdPagoBitacora();
+		try (SqlSession session = sqlSessionFactory.openSession()) {
+
+			Consultas consultas = session.getMapper(Consultas.class);
+
+			try {
+
+				String seleccionarPagoDetalles = sqlLoader.getPagoBitacoraDetalles();
+				log.info(seleccionarPagoDetalles);
+				seleccionarPagoDetalles = seleccionarPagoDetalles.replace("#{idBitacora}", idPago);
+
+				pagoDetallesAntes = consultas.consultaPagosBitacoraDetalle(seleccionarPagoDetalles);
+
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+		}
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+
+
+
 		Response<Object> response;
 		String query = pagosUtil.eliminarTodos(crearRequest.getIdPagoBitacora(), usuarioDto.getIdUsuario() );
 		
@@ -596,6 +791,34 @@ public class PagosServiceImpl implements PagosService {
 		response = providerRestTemplate.consumirServicio(request.getDatos(), urlDomino + CONSULTA_GENERICA, 
 				authentication);
 		
+				log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+		List<PagoBitacoraDetalles> pagoDetallesDespues = null;
+		try (SqlSession session = sqlSessionFactory.openSession()) {
+			Consultas consultas = session.getMapper(Consultas.class);
+
+			try {
+
+				String seleccionarPagoDetalles = sqlLoader.getPagoBitacoraDetalles();
+				log.info(seleccionarPagoDetalles);
+				seleccionarPagoDetalles = seleccionarPagoDetalles.replace("#{idBitacora}", idPago);
+
+				pagoDetallesDespues = consultas.consultaPagosBitacoraDetalle(seleccionarPagoDetalles);
+
+				String queryBitacora = sqlLoader.getBitacoraNuevoRegistro();
+				consultas.insertData(queryBitacora, new Bitacora(3, "SVT_PAGO_DETALLE", pagoDetallesAntes.toString(),
+						pagoDetallesDespues.toString(), usuarioDto.getIdUsuario()));
+
+				session.commit();
+			} catch (Exception e) {
+				session.rollback();
+				log.error(e.getMessage());
+			}
+		}
+		log.info(
+				"----------------------------------------------------------------------------------------------------------------");
+
+
 		return response;
 	}
 

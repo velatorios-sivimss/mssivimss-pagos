@@ -22,6 +22,7 @@ public class SQLLoader {
     private String pagoBitacora;
     private String pagoBitacoraDetalles;
     private String ordenesDeServ;
+    private String pagoBitacoraDetallesBuscarPorID;
 
     public SQLLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
@@ -44,6 +45,10 @@ public class SQLLoader {
         resource = resourceLoader.getResource("classpath:sql/PAGOS_CONSULTA_ODS.SQL");
         bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
         ordenesDeServ = new String(bytes, StandardCharsets.UTF_8);
+
+        resource = resourceLoader.getResource("classpath:sql/PAGOS_CONSULTA_DETALLE_POR_ID.SQL");
+        bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
+        pagoBitacoraDetallesBuscarPorID = new String(bytes, StandardCharsets.UTF_8);
 
     }
 

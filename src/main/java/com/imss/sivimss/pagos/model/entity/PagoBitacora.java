@@ -8,24 +8,24 @@ import lombok.Data;
 @Data
 public class PagoBitacora {
     
-    private int idPagoBitacora;
-    private int idRegistro;
-    private int idFlujoPagos;
-    private int idVelatorio;
-    private Date fechaOds;
-    private String nombreContratante;
-    private String claveFolio;
-    private BigDecimal importeValor;
-    private String claveEstatusPago;
-    private int idUsuarioAlta;
-    private Date fechaAlta;
-    private Integer idUsuarioBaja;
-    private Date fechaBaja;
-    private Integer idUsuarioModifica;
-    private Date fechaActualizacion;
-    private char indGenPagare;
-    private char indModPago;
-    private int idPlataforma;
+    private int ID_PAGO_BITACORA;
+    private int ID_REGISTRO;
+    private int ID_FLUJO_PAGOS;
+    private int ID_VELATORIO;
+    private String FEC_ODS;
+    private String NOM_CONTRATANTE;
+    private String CVE_FOLIO;
+    private BigDecimal IMP_VALOR;
+    private String CVE_ESTATUS_PAGO;
+    private int ID_USUARIO_ALTA;
+    private String FEC_ALTA;
+    private Integer ID_USUARIO_BAJA;
+    private String FEC_BAJA;
+    private Integer ID_USUARIO_MODIFICA;
+    private String FEC_ACTUALIZACION;
+    private char IND_GEN_PAGARE;
+    private char IND_MOD_PAGO;
+    private int ID_PLATAFORMA;
 
     
 }
