@@ -10,10 +10,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import com.imss.sivimss.pagos.configuration.mapper.Consultas;
@@ -44,10 +40,7 @@ public class MyBatisConfig {
 
 	public SqlSessionFactory buildqlSessionFactory() {
 		URL = URL.replace("jdbc:mysql", "jdbc:mariadb");
-		log.info("----------------------------------------------------------------------------------------------------------------");
-		log.info(URL);
-		log.info("----------------------------------------------------------------------------------------------------------------");
-	    DataSource dataSource = new PooledDataSource(DRIVER, URL, USERNAME, PASSWORD);
+		DataSource dataSource = new PooledDataSource(DRIVER, URL, USERNAME, PASSWORD);
 
 	    Environment environment = new Environment(ENVIROMENT, new JdbcTransactionFactory(), dataSource);
 	        

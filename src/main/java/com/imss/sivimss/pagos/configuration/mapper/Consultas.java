@@ -9,7 +9,9 @@ import org.apache.ibatis.annotations.SelectProvider;
 import org.springframework.stereotype.Repository;
 
 import com.imss.sivimss.pagos.model.entity.Bitacora;
+import com.imss.sivimss.pagos.model.entity.OrdenesServicio;
 import com.imss.sivimss.pagos.model.entity.PagoBitacora;
+import com.imss.sivimss.pagos.model.entity.PagoBitacoraDetalles;
 
 @Repository
 public interface Consultas {
@@ -27,8 +29,13 @@ public interface Consultas {
 
     @SelectProvider(type = PureSqlProvider.class, method = "sql")
 	public PagoBitacora consultaPagosBitacora(String sql);
+
+    @SelectProvider(type = PureSqlProvider.class, method = "sql")
+	public List<PagoBitacoraDetalles> consultaPagosBitacoraDetalle(String sql);
+
+    @SelectProvider(type = PureSqlProvider.class, method = "sql")
+	public OrdenesServicio consultaOrdenesServicio(String sql);
  
     @Insert("${sqlQuery}")
-    // @Options(useGeneratedKeys = true,keyProperty = "bit.idPersona", keyColumn="id")
     int insertData(@Param("sqlQuery") String sqlQuery, @Param("bit")Bitacora bitacora);
 }
