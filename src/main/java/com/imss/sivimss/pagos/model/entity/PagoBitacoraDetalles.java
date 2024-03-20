@@ -9,7 +9,7 @@ public class PagoBitacoraDetalles {
 	private Integer ID_PAGO_BITACORA;
 	private Integer ID_METODO_PAGO;
 	private Double IMP_PAGO;
-	private Integer NUM_AUTORIZACION;
+	private String NUM_AUTORIZACION;
 	private String REF_BANCO;
 	private String FEC_PAGO;
 	private String FEC_VALE_AGF;
