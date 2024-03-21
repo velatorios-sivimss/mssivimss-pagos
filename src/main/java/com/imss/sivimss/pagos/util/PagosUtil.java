@@ -314,9 +314,9 @@ public class PagosUtil {
 			q.agregarParametroValues("REF_BANCO", "'" + datos.getDescBanco() + "'");
 		}
 		
-		if( datos.getFechaPago() != null ) {	
+		/*if( datos.getFechaPago() != null ) {	
 			q.agregarParametroValues("FEC_PAGO", "'" + datos.getFechaPago() + "'" );
-		}
+		}*/
 		
 		if( datos.getFechaValeAGF() != null ) {
 			q.agregarParametroValues("FEC_VALE_AGF", "'" + datos.getFechaValeAGF() + "'");
